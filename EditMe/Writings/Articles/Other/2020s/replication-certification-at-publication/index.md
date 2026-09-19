@@ -29,4 +29,4 @@ build:
   list: never
 ---
 
-**[This paper is in progress, and so the page's URL is presently unlisted.]**
+**[This paper is in progress; the page's URL is presently unlisted.]**
