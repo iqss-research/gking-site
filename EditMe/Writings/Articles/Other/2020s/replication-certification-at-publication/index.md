@@ -29,4 +29,4 @@ build:
   list: never
 ---
 
-**[This page is presently a blind link, not publicly available without the URL]**
+**[This paper is in progress, and so the page's URL is presently unlisted.]**
