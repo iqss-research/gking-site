@@ -40,8 +40,10 @@
     {{/* data-pagefind-body: only index page content, not chrome (navbar,
          Harvard banner, search modal "Powered by Hugo Blox", footer, chat).
          Without this, Pagefind excerpts prepend theme branding and make it
-         look like "Hugo Blox" is an author. */}}
-    <main id="main-content" tabindex="-1" class="page-body {{if ne .Type "landing"}} my-10{{end}}" data-pagefind-body>
+         look like "Hugo Blox" is an author. Blind pages (blind: true) omit
+         the attribute: once any page carries data-pagefind-body, Pagefind
+         skips pages without it, so a blind link never enters site search. */}}
+    <main id="main-content" tabindex="-1" class="page-body {{if ne .Type "landing"}} my-10{{end}}"{{ if not .Params.blind }} data-pagefind-body{{ end }}>
       {{ block "main" . }}{{ end }}
     </main>
     <div class="page-footer">
