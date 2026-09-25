@@ -5,9 +5,10 @@
  *   <script src="https://your-host/gking-chat-widget.js"
  *           data-api-url="https://your-api.example.com/chat"
  *           data-bot-id="gking"
- *           data-bot-name="Gary King's AI Avatar"
+ *           data-bot-name="GaryAI"
  *           data-welcome-message="Hello, I'm Gary King..."
  *           data-avatar-label="GK"
+ *           data-avatar-url="https://your-host/garyai-avatar.png"
  *           data-input-placeholder="Ask me about my research..."
  *           defer></script>
  *
@@ -26,7 +27,7 @@
 (function () {
   "use strict";
 
-  var WIDGET_VERSION = "1.9.0";
+  var WIDGET_VERSION = "1.10.0";
 
   var PIXEL_URL = "https://ueczzuogsj2hnfdr7gwfwuh5sa0oozkm.lambda-url.us-east-2.on.aws/";
 
@@ -205,16 +206,20 @@
       if (d.botName) dataConfig.botName = d.botName;
       if (d.welcomeMessage) dataConfig.welcomeMessage = d.welcomeMessage;
       if (d.avatarLabel) dataConfig.avatarLabel = d.avatarLabel;
+      if (d.avatarUrl) dataConfig.avatarUrl = d.avatarUrl;
       if (d.inputPlaceholder) dataConfig.inputPlaceholder = d.inputPlaceholder;
     }
     var defaults = {
       apiUrl: "",
       feedbackUrl: "",
       botId: "gking",
-      botName: "Gary King's AI Avatar",
+      botName: "GaryAI",
       welcomeMessage:
         "This is Gary King's AI chatbot. How can I help?",
       avatarLabel: "GK",
+      // Gary's picture ships next to this script, so it resolves on any host
+      // that embeds the widget. avatarLabel is its alt text.
+      avatarUrl: scriptEl && scriptEl.src ? scriptEl.src.replace(/[^/]*$/, "") + "garyai-avatar.png" : "",
       inputPlaceholder: "Ask me about my research..."
     };
     return Object.assign({}, defaults, userConfig, dataConfig);
@@ -228,6 +233,11 @@
   }
 
   var FONT = "'Helvetica Neue', Arial, sans-serif";
+  var USER_ICON_SVG =
+    '<svg class="avatar-user" viewBox="0 0 26 26" aria-hidden="true">' +
+    '<rect width="26" height="26" fill="#666666"/>' +
+    '<g fill="#fff"><circle cx="13" cy="9.1" r="4.2"/><ellipse cx="13" cy="22.2" rx="8.8" ry="7.5"/></g>' +
+    "</svg>";
   var CSS = [
     // Match the chatbot (static/index.html + Next.js `antialiased` body) by
     // pinning the same font stack AND the same smoothing hints inside the
@@ -248,25 +258,49 @@
     "  position: fixed; right: 24px; bottom: 24px;",
     "  width: 60px; height: 60px; border-radius: 50%;",
     "  border: none; cursor: pointer;",
-    "  background: linear-gradient(135deg, #5876a9, #abc5ec);",
+    "  background: #000000;",
     "  color: #fff;",
-    "  box-shadow: 0 8px 24px rgba(88,118,169,0.35);",
+    // An even light glow (faint ring + soft halo) rather than a drop shadow.
+    "  box-shadow: 0 0 0 5px rgba(0,0,0,0.07), 0 0 24px 6px rgba(0,0,0,0.22);",
     "  display: flex; align-items: center; justify-content: center;",
     "  z-index: 2147483000;",
     "  transition: transform 0.15s ease;",
     "}",
     ".btn:active { transform: scale(0.94); }",
+    // Closed, the launcher reads "GaryAI" on the black disc; open, the X.
+    ".btn { padding: 0; }",
+    ".btn .icon-chat { font-size: 13px; font-weight: 600; line-height: 1; }",
+    // A light band sweeps left to right across "GaryAI", then rests. The
+    // gradient is clipped to the glyphs; the rest of the text stays a softer
+    // white so the band reads as a glow passing over it.
+    ".btn .icon-chat {",
+    "  color: transparent;",
+    "  background: linear-gradient(110deg, rgba(255,255,255,0.84) 36%, #fff 46%, #fff 54%, rgba(255,255,255,0.84) 64%);",
+    // A soft halo on the glyphs so the passing band reads as light, not just brighter paint.
+    "  filter: drop-shadow(0 0 3px rgba(255,255,255,0.35));",
+    "  background-size: 250% 100%; background-position: 100% 0;",
+    "  -webkit-background-clip: text; background-clip: text;",
+    "  animation: gkShimmer 3.6s ease-in-out infinite;",
+    "}",
+    "@keyframes gkShimmer {",
+    "  0% { background-position: 100% 0; }",
+    "  55%, 100% { background-position: 0% 0; }",
+    "}",
+    "@media (prefers-reduced-motion: reduce) {",
+    "  .btn .icon-chat { animation: none; color: #fff; background: none; }",
+    "}",
+    ":host .btn .icon-chat { font-family: ui-sans-serif, system-ui, sans-serif !important; }",
     ".panel {",
     "  position: fixed; right: 24px; bottom: 100px;",
     "  width: min(380px, calc(100vw - 32px));",
     "  height: min(560px, calc(100vh - 140px));",
     "  background: #fff;",
     "  border-radius: 16px;",
-    "  border: 1px solid #dde8f5;",
-    "  box-shadow: 0 12px 48px rgba(88,118,169,0.25);",
+    "  border: 1px solid #dcdcdc;",
+    "  box-shadow: 0 12px 48px rgba(0,0,0,0.25);",
     "  display: flex; flex-direction: column; overflow: hidden;",
     "  z-index: 2147483001;",
-    "  color: #3a4a6b;",
+    "  color: #333333;",
     "}",
     ".panel[hidden] { display: none; }",
     ".panel.fullscreen {",
@@ -275,28 +309,27 @@
     "  border-radius: 0; border: none;",
     "  box-shadow: none;",
     "}",
+    // Palette follows the GaryAI Daily Report email (NYT-style): white
+    // header over a hairline rule, black accents, greys, #286ed0 links. The
+    // header is the name alone; Gary's picture sits beside his bubbles.
     ".header {",
-    "  padding: 14px 16px;",
-    "  background: linear-gradient(135deg, #5876a9, #abc5ec);",
-    "  color: #fff;",
+    "  padding: 12px 16px;",
+    "  background: #fff;",
+    "  color: #000000;",
+    "  border-bottom: 1px solid #dcdcdc;",
     "  display: flex; align-items: center; gap: 10px;",
     "}",
-    ".header .avatar {",
-    "  width: 34px; height: 34px; border-radius: 50%;",
-    "  background: rgba(255,255,255,0.18);",
-    "  border: 1px solid rgba(255,255,255,0.35);",
-    "  display: flex; align-items: center; justify-content: center;",
-    "  font-size: 12px; font-weight: 700;",
-    "}",
     ".header .title { flex: 1; min-width: 0; }",
-    ".header .name { font-size: 15px; font-weight: 700; line-height: 1.2; }",
-    ".header .status { font-size: 11px; opacity: 0.85; margin-top: 2px; }",
+    // "GaryAI" everywhere uses the site nav's font (the "Bio & C.V." links).
+    ".header .name { font-size: 16px; font-weight: 600; line-height: 1.2; }",
+    ":host .header .name { font-family: ui-sans-serif, system-ui, sans-serif !important; }",
+    ".header .status { font-size: 11px; color: #666666; margin-top: 2px; }",
     ".header .status-dot {",
     "  display: inline-block; width: 6px; height: 6px; border-radius: 50%;",
     "  background: #1bbc9d; margin-right: 6px; vertical-align: middle;",
     "}",
     ".header .close, .header .expand, .header .minimize, .header .hist-btn {",
-    "  background: transparent; border: none; color: #fff;",
+    "  background: transparent; border: none; color: #333333;",
     "  opacity: 0.9; cursor: pointer; padding: 4px; display: flex;",
     "}",
     ".header .close:hover, .header .expand:hover, .header .minimize:hover, .header .hist-btn:hover { opacity: 1; }",
@@ -304,17 +337,20 @@
     "  flex: 1; overflow-y: auto;",
     "  padding: 14px 14px 6px;",
     "  display: flex; flex-direction: column; gap: 12px;",
-    "  background: #f7f9fc;",
+    "  background: #f7f7f7;",
     "}",
     ".msg { display: flex; gap: 8px; align-items: flex-start; }",
-    ".msg.user { justify-content: flex-end; }",
+    // User turns: time stamp above a right-aligned bubble, user icon at the
+    // bubble's bottom edge. Gary's turns: his picture beside a white bubble.
+    ".msg.user { justify-content: flex-end; align-items: flex-end; }",
+    ".msg.user .ucol { display: flex; flex-direction: column; align-items: flex-end; max-width: 82%; min-width: 0; }",
+    ".msg.user .ucol .bubble { max-width: 100%; }",
+    ".msg-time { font-size: 11px; color: #888888; margin: 0 2px 3px 0; }",
     ".avatar-sm {",
     "  width: 26px; height: 26px; border-radius: 50%;",
-    "  background: linear-gradient(135deg, #5876a9, #abc5ec);",
-    "  color: #fff;",
-    "  display: flex; align-items: center; justify-content: center;",
-    "  font-size: 10px; font-weight: 700; flex-shrink: 0; margin-top: 2px;",
+    "  display: block; flex-shrink: 0; margin-top: 2px; object-fit: cover;",
     "}",
+    ".avatar-user { width: 26px; height: 26px; flex-shrink: 0; display: block; border-radius: 50%; overflow: hidden; }",
     ".bubble {",
     "  max-width: 82%;",
     "  padding: 9px 12px;",
@@ -325,55 +361,55 @@
     "}",
     ".msg.user .bubble {",
     "  border-radius: 14px 14px 4px 14px;",
-    "  background: #5876a9; color: #fff;",
+    "  background: #e8e8e8; color: #333333;",
     "}",
     ".msg.bot .bubble {",
     "  border-radius: 14px 14px 14px 4px;",
-    "  background: #fff; color: #3a4a6b;",
-    "  border: 1px solid #dde8f5;",
+    "  background: #fff; color: #333333;",
+    "  border: 1px solid #dcdcdc;",
     "}",
-    ".bubble strong { color: #5876a9; font-weight: 700; }",
+    ".bubble strong { color: #000000; font-weight: 700; }",
     ".bubble code {",
     "  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;",
-    "  background: #f7f9fc; border: 1px solid #dde8f5; border-radius: 4px;",
-    "  padding: 1px 5px; font-size: 0.92em; color: #5876a9;",
+    "  background: #f7f7f7; border: 1px solid #dcdcdc; border-radius: 4px;",
+    "  padding: 1px 5px; font-size: 0.92em; color: #000000;",
     "}",
-    ".bubble a { color: #5876a9; text-decoration: underline; }",
+    ".bubble a { color: #286ed0; text-decoration: underline; }",
     // ── Step thread ────────────────────────────────────────────────────────
     // One line per tool call while the answer is being worked out. Colour is
     // used for exactly one thing here: the step happening right now.
     ".thread { list-style: none; margin: 0 0 10px; padding: 0; }",
     ".thread-step {",
     "  display: flex; align-items: baseline; gap: 8px;",
-    "  font-size: 12.5px; line-height: 1.6; color: #7a8fb5;",
+    "  font-size: 12.5px; line-height: 1.6; color: #666666;",
     "  animation: gkRise 200ms ease-out;",
     "}",
     ".thread-dot {",
     "  width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0;",
-    "  background: #b0bfd4; transform: translateY(-1px);",
+    "  background: #aaaaaa; transform: translateY(-1px);",
     "}",
-    ".thread-step.is-live { color: #5876a9; }",
+    ".thread-step.is-live { color: #000000; }",
     ".thread-step.is-live .thread-dot {",
-    "  background: #5876a9;",
+    "  background: #000000;",
     "  animation: gkBreathe 1.8s ease-in-out infinite;",
     "}",
     ".thread-summary {",
     "  display: block; margin: 0 0 10px; padding: 0;",
     "  background: none; border: none; cursor: pointer;",
-    "  font-family: inherit; font-size: 12.5px; color: #b0bfd4;",
+    "  font-family: inherit; font-size: 12.5px; color: #aaaaaa;",
     "  transition: color 140ms ease;",
     "}",
-    ".thread-summary:hover { color: #7a8fb5; }",
+    ".thread-summary:hover { color: #666666; }",
     // Dots on top, caption underneath. align-items keeps the dots bubble from
     // stretching to the caption's width.
     ".wait-stack { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; }",
     ".waiting {",
-    "  font-size: 12.5px; color: #7a8fb5; padding: 1px 4px;",
+    "  font-size: 12.5px; color: #666666; padding: 1px 4px;",
     "  animation: gkRise 200ms ease-out;",
     "}",
     "@keyframes gkBreathe {",
-    "  0%, 100% { box-shadow: 0 0 0 0 rgba(88, 118, 169, 0.40); }",
-    "  50% { box-shadow: 0 0 0 5px rgba(88, 118, 169, 0); }",
+    "  0%, 100% { box-shadow: 0 0 0 0 rgba(0,0,0, 0.40); }",
+    "  50% { box-shadow: 0 0 0 5px rgba(0,0,0, 0); }",
     "}",
     "@keyframes gkRise {",
     "  from { opacity: 0; transform: translateY(4px); }",
@@ -401,13 +437,13 @@
     // (and for engines without :has(), where this rule simply drops).
     ".msg.bot .bubble:has(.katex-display) { max-width: 97%; }",
     ".typing {",
-    "  background: #fff; border: 1px solid #dde8f5;",
+    "  background: #fff; border: 1px solid #dcdcdc;",
     "  border-radius: 14px 14px 14px 4px;",
     "  padding: 10px 14px; display: flex; gap: 4px;",
     "}",
     ".typing span {",
     "  width: 6px; height: 6px; border-radius: 50%;",
-    "  background: #5876a9; animation: gkingPulse 1.2s infinite;",
+    "  background: #000000; animation: gkingPulse 1.2s infinite;",
     "}",
     ".typing span:nth-child(2) { animation-delay: 120ms; }",
     ".typing span:nth-child(3) { animation-delay: 240ms; }",
@@ -417,34 +453,34 @@
     "}",
     ".input-row {",
     "  padding: 12px; background: #fff;",
-    "  border-top: 1px solid #dde8f5;",
+    "  border-top: 1px solid #dcdcdc;",
     "  display: flex; gap: 8px; align-items: flex-end;",
     "}",
     ".input-row textarea {",
     "  flex: 1; resize: none;",
-    "  border: 1px solid #dde8f5; border-radius: 10px;",
+    "  border: 1px solid #dcdcdc; border-radius: 10px;",
     "  padding: 9px 12px; font-size: 14px;",
     "  font-family: 'Helvetica Neue', Arial, sans-serif;",
-    "  color: #3a4a6b; outline: none;",
+    "  color: #333333; outline: none;",
     "  max-height: 120px; line-height: 1.4;",
     "}",
     ".input-row .send {",
     "  width: 38px; height: 38px; border-radius: 50%; border: none;",
-    "  background: linear-gradient(135deg, #5876a9, #abc5ec);",
+    "  background: #000000;",
     "  color: #fff; cursor: pointer;",
     "  display: flex; align-items: center; justify-content: center; flex-shrink: 0;",
     "}",
-    ".input-row .send:disabled { background: #b0bfd4; cursor: not-allowed; }",
-    ".input-row .send.stop { background: #b0bfd4; cursor: pointer; }",
-    ".input-row .send.stop:hover { background: #9aacc4; }",
+    ".input-row .send:disabled { background: #aaaaaa; cursor: not-allowed; }",
+    ".input-row .send.stop { background: #aaaaaa; cursor: pointer; }",
+    ".input-row .send.stop:hover { background: #888888; }",
     // Attach button. Unlike the full-page pill, .input-row has no overflow:hidden,
     // so this drops in with no cap-radius treatment needed.
     ".input-row .attach {",
     "  width: 34px; height: 38px; border: none; background: transparent;",
-    "  color: #b0bfd4; cursor: pointer; flex-shrink: 0;",
+    "  color: #aaaaaa; cursor: pointer; flex-shrink: 0;",
     "  display: flex; align-items: center; justify-content: center;",
     "}",
-    ".input-row .attach:hover { color: #5876a9; }",
+    ".input-row .attach:hover { color: #000000; }",
     ".input-row .attach[hidden] { display: none; }",
     // Chips sit above the input row, outside .messages — which is rebuilt
     // wholesale every animation frame while streaming.
@@ -469,21 +505,21 @@
     ".upload-err-x:hover { color: #8c3b36; }",
     ".chip {",
     "  display: flex; align-items: center; gap: 6px;",
-    "  background: #f4f7fc; border: 1px solid #dde8f5; border-radius: 9px;",
-    "  padding: 5px 6px 5px 8px; font-size: 11px; color: #3a4a6b;",
+    "  background: #f5f5f5; border: 1px solid #dcdcdc; border-radius: 9px;",
+    "  padding: 5px 6px 5px 8px; font-size: 11px; color: #333333;",
     "  max-width: 200px; position: relative; overflow: hidden;",
     "}",
     ".chip.error { border-color: #e6c3c1; background: #fdf5f5; }",
     ".chip-icon { flex-shrink: 0; }",
     ".chip-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 600; }",
-    ".chip-meta { color: #7a8fb5; white-space: nowrap; font-size: 10px; }",
-    ".chip-x { background: none; border: none; cursor: pointer; color: #b0bfd4; font-size: 14px; line-height: 1; padding: 0 2px; }",
+    ".chip-meta { color: #666666; white-space: nowrap; font-size: 10px; }",
+    ".chip-x { background: none; border: none; cursor: pointer; color: #aaaaaa; font-size: 14px; line-height: 1; padding: 0 2px; }",
     ".chip-x:hover { color: #c45a55; }",
-    ".chip-bar { position: absolute; left: 0; bottom: 0; height: 2px; background: #5876a9; transition: width 0.2s; }",
+    ".chip-bar { position: absolute; left: 0; bottom: 0; height: 2px; background: #000000; transition: width 0.2s; }",
     ".bubble .chips { padding: 0 0 6px; }",
-    ".bubble .chip { background: rgba(255,255,255,0.16); border-color: rgba(255,255,255,0.3); color: inherit; max-width: 100%; }",
+    ".bubble .chip { background: #fff; border-color: #dcdcdc; color: inherit; max-width: 100%; }",
     ".bubble .chip-meta { color: inherit; opacity: 0.75; }",
-    ".panel.dragging { outline: 2px dashed #5876a9; outline-offset: -4px; }",
+    ".panel.dragging { outline: 2px dashed #000000; outline-offset: -4px; }",
     ".feedback-row {",
     "  display: flex; gap: 4px; align-items: center;",
     "  margin: 4px 0 0 34px;",
@@ -491,7 +527,7 @@
     ".feedback-btn {",
     "  background: transparent; border: none; cursor: pointer;",
     "  padding: 4px; border-radius: 6px; line-height: 0;",
-    "  color: #8a9ab8; transition: background 0.15s ease, color 0.15s ease;",
+    "  color: #888888; transition: background 0.15s ease, color 0.15s ease;",
     "}",
     ".feedback-btn.up:hover:not(:disabled) { background: #e6f7f0; color: #2bb673; }",
     ".feedback-btn.down:hover:not(:disabled) { background: #fdeceb; color: #e15554; }",
@@ -499,156 +535,156 @@
     ".feedback-btn.down.active { color: #e15554; }",
     ".feedback-btn:disabled { cursor: default; }",
     ".feedback-btn.active:disabled { opacity: 1; }",
-    ".feedback-thanks { font-size: 11px; color: #8a9ab8; margin-left: 4px; }",
+    ".feedback-thanks { font-size: 11px; color: #888888; margin-left: 4px; }",
     ".feedback-comment {",
     "  margin: 6px 0 0 34px;",
     "  display: flex; flex-direction: column; gap: 6px;",
-    "  background: #fff; border: 1px solid #dde8f5; border-radius: 10px;",
+    "  background: #fff; border: 1px solid #dcdcdc; border-radius: 10px;",
     "  padding: 8px;",
     "}",
     ".feedback-comment textarea {",
     "  border: none; outline: none; resize: vertical;",
     "  min-height: 48px; max-height: 120px;",
     "  font-family: 'Helvetica Neue', Arial, sans-serif;",
-    "  font-size: 13px; color: #3a4a6b;",
+    "  font-size: 13px; color: #333333;",
     "}",
     ".feedback-comment .row {",
     "  display: flex; gap: 6px; justify-content: flex-end;",
     "}",
     ".feedback-comment button {",
     "  font-size: 12px; padding: 5px 10px; border-radius: 6px;",
-    "  border: 1px solid #dde8f5; background: #fff; color: #5876a9;",
+    "  border: 1px solid #dcdcdc; background: #fff; color: #000000;",
     "  cursor: pointer; font-family: inherit;",
     "}",
     ".feedback-comment button.primary {",
-    "  background: linear-gradient(135deg, #5876a9, #abc5ec);",
+    "  background: #000000;",
     "  border-color: transparent; color: #fff;",
     "}",
     ".session-rating {",
     "  position: relative;",
     "  margin: 8px auto 2px;",
     "  padding: 10px 30px 10px 14px;",
-    "  background: #fff; border: 1px solid #dde8f5; border-radius: 12px;",
-    "  box-shadow: 0 2px 10px rgba(88,118,169,0.08);",
+    "  background: #fff; border: 1px solid #dcdcdc; border-radius: 12px;",
+    "  box-shadow: 0 2px 10px rgba(0,0,0,0.08);",
     "  display: flex; flex-direction: column; gap: 7px;",
     "  max-width: 100%;",
     "}",
-    ".sr-question { font-size: 12px; color: #3a4a6b; font-weight: 600; }",
-    ".sr-optional { font-weight: 400; color: #8a9ab8; }",
+    ".sr-question { font-size: 12px; color: #333333; font-weight: 600; }",
+    ".sr-optional { font-weight: 400; color: #888888; }",
     ".sr-options { display: flex; gap: 5px; flex-wrap: wrap; }",
     ".sr-options button {",
     "  font-size: 12px; padding: 5px 10px; border-radius: 999px;",
-    "  border: 1px solid #dde8f5; background: #f7f9fc; color: #3a4a6b;",
+    "  border: 1px solid #dcdcdc; background: #f7f7f7; color: #333333;",
     "  cursor: pointer; font-family: inherit;",
     "  transition: background 0.15s, border-color 0.15s;",
     "}",
-    ".sr-options button:hover { background: #fff; border-color: #abc5ec; }",
+    ".sr-options button:hover { background: #fff; border-color: #999999; }",
     ".sr-dismiss {",
     "  position: absolute; top: 5px; right: 7px;",
     "  background: transparent; border: none; cursor: pointer;",
-    "  color: #b0bfd4; font-size: 12px; padding: 2px; line-height: 1;",
+    "  color: #aaaaaa; font-size: 12px; padding: 2px; line-height: 1;",
     "}",
-    ".sr-dismiss:hover { color: #5876a9; }",
-    ".sr-thanks { font-size: 12px; color: #8a9ab8; }",
+    ".sr-dismiss:hover { color: #000000; }",
+    ".sr-thanks { font-size: 12px; color: #888888; }",
     ".session-rating textarea {",
-    "  border: 1px solid #dde8f5; border-radius: 8px; outline: none; resize: vertical;",
+    "  border: 1px solid #dcdcdc; border-radius: 8px; outline: none; resize: vertical;",
     "  min-height: 40px; max-height: 120px; padding: 6px 8px;",
     "  font-family: 'Helvetica Neue', Arial, sans-serif;",
-    "  font-size: 12px; color: #3a4a6b;",
+    "  font-size: 12px; color: #333333;",
     "}",
     ".sr-actions { display: flex; gap: 6px; justify-content: flex-end; }",
     ".sr-actions button {",
     "  font-size: 12px; padding: 4px 10px; border-radius: 6px;",
-    "  border: 1px solid #dde8f5; background: #fff; color: #5876a9;",
+    "  border: 1px solid #dcdcdc; background: #fff; color: #000000;",
     "  cursor: pointer; font-family: inherit;",
     "}",
     ".sr-actions button.primary {",
-    "  background: linear-gradient(135deg, #5876a9, #abc5ec);",
+    "  background: #000000;",
     "  border-color: transparent; color: #fff;",
     "}",
     ".footer {",
     "  padding: 6px 12px 8px; background: #fff;",
-    "  border-top: 1px solid #eef2f9;",
+    "  border-top: 1px solid #efefef;",
     "  text-align: center;",
     "}",
     ".footer-text {",
-    "  font-size: 11px; color: #8a9ab8; line-height: 1.4;",
+    "  font-size: 11px; color: #888888; line-height: 1.4;",
     "}",
     ".footer-link {",
     "  background: transparent; border: none; cursor: pointer;",
-    "  font-size: 11px; color: #8a9ab8; text-decoration: underline;",
+    "  font-size: 11px; color: #888888; text-decoration: underline;",
     "  font-family: inherit; padding: 0;",
     "}",
-    ".footer-link:hover { color: #5876a9; }",
+    ".footer-link:hover { color: #000000; }",
     ".modal-overlay {",
     "  position: absolute; inset: 0;",
-    "  background: rgba(58,74,107,0.35);",
+    "  background: rgba(0,0,0,0.35);",
     "  display: flex; align-items: center; justify-content: center;",
     "  padding: 16px; z-index: 10;",
     "}",
     ".modal-overlay[hidden] { display: none; }",
     ".modal {",
     "  background: #fff; border-radius: 12px; padding: 14px;",
-    "  width: 100%; box-shadow: 0 8px 24px rgba(58,74,107,0.2);",
+    "  width: 100%; box-shadow: 0 8px 24px rgba(0,0,0,0.2);",
     "  display: flex; flex-direction: column; gap: 10px;",
     "}",
-    ".modal h3 { margin: 0; font-size: 14px; color: #3a4a6b; font-weight: 700; }",
-    ".modal p { margin: 0; font-size: 12px; color: #8a9ab8; }",
+    ".modal h3 { margin: 0; font-size: 14px; color: #333333; font-weight: 700; }",
+    ".modal p { margin: 0; font-size: 12px; color: #888888; }",
     ".modal textarea {",
-    "  border: 1px solid #dde8f5; border-radius: 8px; padding: 8px;",
+    "  border: 1px solid #dcdcdc; border-radius: 8px; padding: 8px;",
     "  resize: vertical; min-height: 80px; max-height: 180px;",
     "  font-family: 'Helvetica Neue', Arial, sans-serif;",
-    "  font-size: 13px; color: #3a4a6b; outline: none;",
+    "  font-size: 13px; color: #333333; outline: none;",
     "}",
     ".modal .row { display: flex; gap: 8px; justify-content: flex-end; }",
     ".modal button {",
     "  font-size: 13px; padding: 6px 12px; border-radius: 8px;",
-    "  border: 1px solid #dde8f5; background: #fff; color: #5876a9;",
+    "  border: 1px solid #dcdcdc; background: #fff; color: #000000;",
     "  cursor: pointer; font-family: inherit;",
     "}",
     ".modal button.primary {",
-    "  background: linear-gradient(135deg, #5876a9, #abc5ec);",
+    "  background: #000000;",
     "  border-color: transparent; color: #fff;",
     "}",
     ".figures {",
     "  margin-top: 10px; padding-top: 8px;",
-    "  border-top: 1px dashed #dde8f5;",
+    "  border-top: 1px dashed #dcdcdc;",
     "  display: flex; flex-direction: column; gap: 8px;",
     "}",
     ".figures-label {",
     "  font-size: 9px; font-weight: 700; letter-spacing: 1.2px;",
-    "  text-transform: uppercase; color: #8a9ab8;",
+    "  text-transform: uppercase; color: #888888;",
     "}",
     ".figure { display: flex; flex-direction: column; gap: 3px; }",
     ".figure a { display: block; line-height: 0; }",
     ".figure img {",
     "  display: block; width: 100%; height: auto;",
     "  max-height: 220px; object-fit: contain;",
-    "  background: #f7f9fc;",
-    "  border: 1px solid #dde8f5; border-radius: 6px;",
+    "  background: #f7f7f7;",
+    "  border: 1px solid #dcdcdc; border-radius: 6px;",
     "  cursor: zoom-in;",
     "}",
     ".figure-caption {",
-    "  font-size: 11px; color: #8a9ab8; font-style: italic;",
+    "  font-size: 11px; color: #888888; font-style: italic;",
     "  line-height: 1.35; word-break: break-word;",
     "}",
     ".previews { margin-top: 14px; display: grid; gap: 10px; }",
     ".preview-card {",
     "  display: flex; align-items: stretch; gap: 12px;",
-    "  padding: 10px; border: 1px solid #dde8f5; border-radius: 8px;",
-    "  background: #f7f9fc; text-decoration: none; color: #3a4a6b;",
+    "  padding: 10px; border: 1px solid #dcdcdc; border-radius: 8px;",
+    "  background: #f7f7f7; text-decoration: none; color: #333333;",
     "  transition: border-color 120ms, background 120ms;",
     "}",
-    ".preview-card:hover { border-color: #abc5ec; background: #fff; }",
+    ".preview-card:hover { border-color: #999999; background: #fff; }",
     ".preview-card-image {",
     "  flex: 0 0 auto; width: 80px; height: 80px;",
     "  object-fit: cover; border-radius: 6px;",
-    "  border: 1px solid #dde8f5; background: #fff;",
+    "  border: 1px solid #dcdcdc; background: #fff;",
     "}",
     ".preview-card-favicon-wrap {",
     "  flex: 0 0 auto; width: 80px; height: 80px;",
     "  display: flex; align-items: center; justify-content: center;",
-    "  border-radius: 6px; border: 1px solid #dde8f5; background: #fff;",
+    "  border-radius: 6px; border: 1px solid #dcdcdc; background: #fff;",
     "}",
     ".preview-card-favicon { width: 48px; height: 48px; object-fit: contain; }",
     ".preview-card-body {",
@@ -656,17 +692,17 @@
     "}",
     ".preview-card-site {",
     "  font-size: 10px; font-weight: 700; letter-spacing: 1.2px;",
-    "  text-transform: uppercase; color: #7a8fb5;",
+    "  text-transform: uppercase; color: #666666;",
     "  margin-bottom: 2px;",
     "  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;",
     "}",
     ".preview-card-title {",
-    "  font-size: 13px; font-weight: 600; color: #5876a9; line-height: 1.3;",
+    "  font-size: 13px; font-weight: 600; color: #000000; line-height: 1.3;",
     "  display: -webkit-box; -webkit-line-clamp: 2;",
     "  -webkit-box-orient: vertical; overflow: hidden;",
     "}",
     ".preview-card-desc {",
-    "  font-size: 12px; color: #7a8fb5; line-height: 1.4; margin-top: 3px;",
+    "  font-size: 12px; color: #666666; line-height: 1.4; margin-top: 3px;",
     "  display: -webkit-box; -webkit-line-clamp: 2;",
     "  -webkit-box-orient: vertical; overflow: hidden;",
     "}",
@@ -699,7 +735,7 @@
     ".hist {",
     "  position: absolute; top: 0; bottom: 0; left: 0;",
     "  width: min(300px, 88%);",
-    "  background: #fff; border-right: 1px solid #dde8f5;",
+    "  background: #fff; border-right: 1px solid #dcdcdc;",
     "  display: flex; flex-direction: column;",
     "  transform: translateX(-102%);",
     "  transition: transform 180ms ease;",
@@ -709,7 +745,7 @@
     ".hist.open { transform: translateX(0); }",
     ".hist-scrim {",
     "  position: absolute; inset: 0;",
-    "  background: rgba(58,74,107,0.35);",
+    "  background: rgba(0,0,0,0.35);",
     "  opacity: 0; pointer-events: none;",
     "  transition: opacity 180ms ease;",
     "  z-index: 2;",
@@ -718,35 +754,35 @@
     ".hist-head {",
     "  display: flex; align-items: center; gap: 8px;",
     "  padding: 10px 10px 8px 12px;",
-    "  border-bottom: 1px solid #eef2f9;",
+    "  border-bottom: 1px solid #efefef;",
     "}",
     ".hist-new {",
     "  flex: 1; display: flex; align-items: center; gap: 6px;",
-    "  background: #f2f6fc; border: 1px solid #dde8f5; border-radius: 8px;",
-    "  color: #5876a9; font-size: 12.5px; font-weight: 600;",
+    "  background: #f5f5f5; border: 1px solid #dcdcdc; border-radius: 8px;",
+    "  color: #000000; font-size: 12.5px; font-weight: 600;",
     "  padding: 7px 10px; cursor: pointer; text-align: left;",
     "}",
-    ".hist-new:hover { background: #e8eff9; }",
-    ".hist-close { background: transparent; border: none; color: #7a8fb5; cursor: pointer; padding: 4px; display: flex; }",
-    ".hist-close:hover { color: #5876a9; }",
+    ".hist-new:hover { background: #ebebeb; }",
+    ".hist-close { background: transparent; border: none; color: #666666; cursor: pointer; padding: 4px; display: flex; }",
+    ".hist-close:hover { color: #000000; }",
     ".hist-list { flex: 1; overflow-y: auto; padding: 6px 6px 10px; }",
     ".hist-item {",
     "  position: relative; display: block; width: 100%; text-align: left;",
     "  background: transparent; border: none; cursor: pointer;",
     "  padding: 8px 50px 8px 10px; margin: 1px 0;",
-    "  border-radius: 8px; color: #3a4a6b;",
+    "  border-radius: 8px; color: #333333;",
     "}",
-    ".hist-item:hover { background: #f4f7fc; }",
-    ".hist-item.is-active { background: #eef2f9; box-shadow: inset 2px 0 0 #5876a9; }",
+    ".hist-item:hover { background: #f5f5f5; }",
+    ".hist-item.is-active { background: #efefef; box-shadow: inset 2px 0 0 #000000; }",
     ".hist-title {",
     "  display: block; font-size: 13px; line-height: 1.35; font-weight: 600;",
     "  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;",
     "}",
-    ".hist-meta { display: block; font-size: 11px; color: #7a8fb5; margin-top: 2px; }",
+    ".hist-meta { display: block; font-size: 11px; color: #666666; margin-top: 2px; }",
     ".hist-rename {",
     "  width: 100%; font: inherit; font-size: 13px; font-weight: 600;",
-    "  color: #3a4a6b; background: #fff;",
-    "  border: 1px solid #abc5ec; border-radius: 5px;",
+    "  color: #333333; background: #fff;",
+    "  border: 1px solid #999999; border-radius: 5px;",
     "  padding: 1px 5px; outline: none;",
     "}",
     ".hist-actions {",
@@ -754,18 +790,18 @@
     "  display: flex; align-items: center; gap: 1px;",
     "  opacity: 0; transition: opacity 120ms ease;",
     "}",
-    ".hist-act { display: flex; color: #b0bfd4; cursor: pointer; padding: 4px; border-radius: 5px; }",
+    ".hist-act { display: flex; color: #aaaaaa; cursor: pointer; padding: 4px; border-radius: 5px; }",
     ".hist-item:hover .hist-actions, .hist-actions:focus-within { opacity: 1; }",
-    ".hist-act:hover { color: #5876a9; background: #e3ebf7; }",
+    ".hist-act:hover { color: #000000; background: #e8e8e8; }",
     ".hist-del:hover { color: #d06b7a; background: #f9e9ec; }",
-    ".hist-empty { padding: 22px 14px; font-size: 12.5px; color: #7a8fb5; text-align: center; line-height: 1.6; }",
+    ".hist-empty { padding: 22px 14px; font-size: 12.5px; color: #666666; text-align: center; line-height: 1.6; }",
     ".hist-foot {",
-    "  border-top: 1px solid #eef2f9; padding: 9px 12px;",
-    "  font-size: 11px; color: #7a8fb5;",
+    "  border-top: 1px solid #efefef; padding: 9px 12px;",
+    "  font-size: 11px; color: #666666;",
     "  display: flex; align-items: center; justify-content: space-between; gap: 8px;",
     "}",
-    ".hist-clear { background: transparent; border: none; color: #7a8fb5; font-size: 11px; text-decoration: underline; cursor: pointer; padding: 0; }",
-    ".hist-clear:hover { color: #5876a9; }",
+    ".hist-clear { background: transparent; border: none; color: #666666; font-size: 11px; text-decoration: underline; cursor: pointer; padding: 0; }",
+    ".hist-clear:hover { color: #000000; }",
     ".hist-clear.confirm { color: #d06b7a; font-weight: 700; text-decoration: none; }",
     // A file whose 24h upload window has closed. The chip stays so the
     // transcript still reads correctly; it just can't be sent again.
@@ -801,16 +837,13 @@
 
   var TEMPLATE = [
     '<button class="btn" type="button" aria-label="Open chat">',
-    '  <svg class="icon-chat" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">',
-    '    <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>',
-    '  </svg>',
+    '  <span class="icon-chat">GaryAI</span>',
     '  <svg class="icon-close" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" style="display:none;">',
     '    <line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/>',
     '  </svg>',
     '</button>',
     '<div class="panel" role="dialog" aria-label="Chat" hidden>',
     '  <div class="header">',
-    '    <div class="avatar"></div>',
     '    <div class="title">',
     '      <div class="name"></div>',
     '      <div class="status" style="display:none;"></div>',
@@ -1208,7 +1241,6 @@
     var iconChat = shadow.querySelector(".icon-chat");
     var iconClose = shadow.querySelector(".icon-close");
     var panel = shadow.querySelector(".panel");
-    var headerAvatar = shadow.querySelector(".header .avatar");
     var headerName = shadow.querySelector(".header .name");
     var closeBtn = shadow.querySelector(".close");
     var expandBtn = shadow.querySelector(".expand");
@@ -1236,7 +1268,6 @@
     var histCloseBtn = shadow.querySelector(".hist-close");
     var histClearBtn = shadow.querySelector(".hist-clear");
 
-    headerAvatar.textContent = config.avatarLabel;
     headerName.textContent = config.botName;
     textarea.placeholder = config.inputPlaceholder;
 
@@ -1387,6 +1418,19 @@
     }
     messagesEl.addEventListener("click", onMessagesClick);
     messagesEl.addEventListener("auxclick", onMessagesClick);
+
+    // Gary's picture beside his bubbles; the time above a user bubble. Turns
+    // restored from history saved before 1.10.0 carry no `at`, so no time.
+    function avatarSmHtml() {
+      return '<img class="avatar-sm" src="' + escapeHtml(config.avatarUrl) + '" alt="' + escapeHtml(config.avatarLabel) + '">';
+    }
+    function fmtMsgTime(ms) {
+      try {
+        return new Date(ms).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+      } catch (e) {
+        return "";
+      }
+    }
 
     function snapshotMessages() {
       return messages.map(function (m) {
@@ -1603,9 +1647,8 @@
         var welcome = document.createElement("div");
         welcome.className = "msg bot";
         welcome.innerHTML =
-          '<div class="avatar-sm">' +
-          escapeHtml(config.avatarLabel) +
-          '</div><div class="bubble">' +
+          avatarSmHtml() +
+          '<div class="bubble">' +
           renderInline(config.welcomeMessage) +
           "</div>";
         messagesEl.appendChild(welcome);
@@ -1618,7 +1661,11 @@
             // legible once the composer clears.
             var uchips = m.attachmentChips && m.attachmentChips.length
               ? '<div class="chips">' + chipsHtml(m.attachmentChips, true, !!m.attachmentsExpired) + "</div>" : "";
-            node.innerHTML = '<div class="bubble">' + uchips + escapeHtml(m.content) + "</div>";
+            node.innerHTML =
+              '<div class="ucol">' +
+              (m.at ? '<div class="msg-time">' + escapeHtml(fmtMsgTime(m.at)) + "</div>" : "") +
+              '<div class="bubble">' + uchips + escapeHtml(m.content) + "</div>" +
+              "</div>" + USER_ICON_SVG;
           } else {
             var visible = stripAttachTags(m.content);
             var isLastForFigs = mi === messages.length - 1;
@@ -1629,9 +1676,8 @@
             // produced the answer, so it reads as preamble, not footnote.
             var stepsHtml = renderStepsHtml(m.steps, m.id);
             node.innerHTML =
-              '<div class="avatar-sm">' +
-              escapeHtml(config.avatarLabel) +
-              '</div><div class="bubble">' +
+              avatarSmHtml() +
+              '<div class="bubble">' +
               stepsHtml +
               renderInline(visible) +
               (showPreviews ? renderPreviewsHtml(m.previews) : "") +
@@ -1668,7 +1714,7 @@
         // invites the reader to think the first line named a paper too.
         var waited = waitingSince ? Date.now() - waitingSince : 0;
         typing.innerHTML =
-          '<div class="avatar-sm">' + escapeHtml(config.avatarLabel) + "</div>" +
+          avatarSmHtml() +
           '<div class="wait-stack">' +
           '<div class="typing"><span></span><span></span><span></span></div>' +
           (waited >= WAITING_CAPTION_MS
@@ -2235,7 +2281,7 @@
         turn_index: messages.filter(function (m) { return m.role === "user"; }).length + 1
       });
 
-      var userMsg = { id: uuid(), role: "user", content: text };
+      var userMsg = { id: uuid(), role: "user", content: text, at: Date.now() };
       if (atts.length) {
         userMsg.attachments = atts;
         // Display copy — `attachments` is the wire format sent to the backend

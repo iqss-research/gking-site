@@ -230,6 +230,8 @@
     if (m.figures && m.figures.length) out.figures = m.figures;
     if (m.previews && m.previews.length) out.previews = m.previews;
     if (m.meta) out.meta = m.meta;
+    // Send time (epoch ms) of a user turn; both surfaces show it above the bubble.
+    if (typeof m.at === "number") out.at = m.at;
 
     /* `steps` is a GKSteps thread — an object of closures. JSON.stringify
        flattens it to {"serverStepCount":0}, which is worse than useless. Keep
@@ -351,6 +353,7 @@
       if (s.figures) m.figures = s.figures;
       if (s.previews) m.previews = s.previews;
       if (s.meta) m.meta = s.meta;
+      if (typeof s.at === "number") m.at = s.at;
       if (s.attachments) {
         /* Dead file_ids must never go back on the wire: the server unions
            attachments across the whole conversation, so one expired id would
