@@ -144,13 +144,21 @@
     flex-shrink: 0;
   }
   /* Palette follows the GaryAI Daily Report email (NYT-style): black and
-     greys, #286ed0 links. "GaryAI" uses the site nav's font (the
-     "Bio & C.V." links). */
+     greys, #286ed0 links. Controls and the "GaryAI" name use the widget's
+     version 4 launcher palette (graphite, metallic rim, silver). "GaryAI"
+     uses the site nav's font (the "Bio & C.V." links). A gradient border is
+     a second background clipped to the border box, which keeps the radius. */
+  :root {
+    --gk-graphite: linear-gradient(160deg, #4a4a4e 0%, #1e1e21 55%, #050506 100%);
+    --gk-rim: linear-gradient(135deg, #f2f2f3 0%, #8a8a8f 45%, #2a2a2d 100%);
+    --gk-gloss: inset 0 1px 0 rgba(255,255,255,0.28);
+  }
   .gk-chat-header h1 {
     font-family: ui-sans-serif, system-ui, sans-serif;
     font-size: clamp(18px, 4vw, 32px);
-    font-weight: 600; color: #000000;
-    margin: 0 0 6px; letter-spacing: -0.02em;
+    font-weight: 600; margin: 0 0 6px; letter-spacing: -0.02em;
+    color: transparent; background: var(--gk-graphite);
+    -webkit-background-clip: text; background-clip: text;
   }
   .gk-masthead-avatar {
     display: block; margin: 0 auto 10px;
@@ -325,8 +333,9 @@
     cursor: pointer; font-family: inherit;
   }
   .gk-fb-comment button.primary {
-    background: #000000;
-    border-color: transparent; color: #fff;
+    border: 1px solid transparent; color: #ececef;
+    background: var(--gk-graphite) padding-box, var(--gk-rim) border-box;
+    box-shadow: var(--gk-gloss);
   }
 
   .gk-session-rating {
@@ -368,8 +377,9 @@
     cursor: pointer; font-family: inherit;
   }
   .gk-sr-actions button.primary {
-    background: #000000;
-    border-color: transparent; color: #fff;
+    border: 1px solid transparent; color: #ececef;
+    background: var(--gk-graphite) padding-box, var(--gk-rim) border-box;
+    box-shadow: var(--gk-gloss);
   }
 
   .gk-figures {
@@ -454,7 +464,6 @@
 
   .gk-input-area {
     flex-shrink: 0; padding: 12px 16px;
-    border-top: 1px solid #efefef;
   }
   .gk-input-row {
     display: flex; gap: 10px; align-items: flex-end;
@@ -470,21 +479,18 @@
     max-height: 120px;
   }
   .gk-input-row textarea::placeholder { color: #aaaaaa; }
+  .gk-input-row:focus-within { border-color: #8a8a8f; }
+  /* Same flat round send button as the widget: light grey while there is
+     nothing to send, graphite with a silver icon when live. */
   .gk-input-row .gk-send {
-    background: transparent; color: #aaaaaa;
-    border: none; padding: 0 20px; font-size: 13px;
-    font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
-    font-family: 'Helvetica Neue', Arial, sans-serif;
-    cursor: default; transition: color 0.2s;
-    white-space: nowrap; border-radius: 0 26px 26px 0;
-    height: 46px;
+    width: 38px; height: 38px; margin: 4px 5px 4px 0; padding: 0;
+    flex-shrink: 0; border-radius: 50%; border: none;
+    display: flex; align-items: center; justify-content: center;
+    background: #1e1e21; color: #ececef; cursor: pointer;
+    transition: background 0.15s;
   }
-  .gk-input-row .gk-send:not(:disabled) {
-    color: #000000; cursor: pointer;
-  }
-  .gk-input-row .gk-send:not(:disabled):hover { color: #3a5a8c; }
-  .gk-input-row .gk-send.stop { color: #c45a55; cursor: pointer; }
-  .gk-input-row .gk-send.stop:hover { color: #a23a35; }
+  .gk-input-row .gk-send:hover:not(:disabled) { background: #3a3a3e; }
+  .gk-input-row .gk-send:disabled { background: #d4d4d8; color: #fff; cursor: not-allowed; }
 
   /* Attach button. The row has overflow:hidden, so this needs its own left cap
      radius, mirroring how .gk-send caps the right. */
@@ -598,8 +604,9 @@
     cursor: pointer; font-family: inherit;
   }
   .gk-modal button.primary {
-    background: #000000;
-    border-color: transparent; color: #fff;
+    border: 1px solid transparent; color: #ececef;
+    background: var(--gk-graphite) padding-box, var(--gk-rim) border-box;
+    box-shadow: var(--gk-gloss);
   }
 
   /* Touch Safari (iPad) auto-zooms the page when focusing an input below
@@ -672,7 +679,7 @@
       <input id="gk-file" type="file" multiple hidden
              accept=".pdf,.csv,.xlsx,.txt,.md,.png,.jpg,.jpeg,.webp,.gif">
       <textarea id="gk-input" rows="1" placeholder="This is Gary King's AI chatbot. How can I help?"></textarea>
-      <button id="gk-send" class="gk-send" type="button" disabled>Send &rarr;</button>
+      <button id="gk-send" class="gk-send" type="button" aria-label="Send" disabled><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></button>
     </div>
   </div>
 
@@ -733,6 +740,9 @@
   var BOT_ID = "gking";
   var AVATAR_LABEL = "GK";
   var AVATAR_URL = "/js/garyai-avatar.png";
+  // Send / stop glyphs for the round send button (same as the widget).
+  var SEND_ICON_SVG = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>';
+  var STOP_ICON_SVG = '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>';
   // Grey head-and-shoulders disc beside user turns (same as the widget).
   var USER_ICON_SVG =
     '<svg class="gk-avatar-user" viewBox="0 0 26 26" aria-hidden="true">' +
@@ -1298,7 +1308,8 @@
   function updateSendState() {
     if (isBusy()) {
       sendBtn.disabled = false;
-      sendBtn.innerHTML = "Stop";
+      sendBtn.innerHTML = STOP_ICON_SVG;
+      sendBtn.setAttribute("aria-label", "Stop");
       sendBtn.classList.add("stop");
     } else {
       // A ready attachment is enough to send on its own; an in-flight upload
@@ -1306,7 +1317,8 @@
       var hasReady = typeof readyAttachments === "function" && readyAttachments().length > 0;
       var busyUploading = typeof anyUploading === "function" && anyUploading();
       sendBtn.disabled = (!textarea.value.trim() && !hasReady) || busyUploading;
-      sendBtn.innerHTML = "Send &rarr;";
+      sendBtn.innerHTML = SEND_ICON_SVG;
+      sendBtn.setAttribute("aria-label", "Send");
       sendBtn.classList.remove("stop");
     }
   }

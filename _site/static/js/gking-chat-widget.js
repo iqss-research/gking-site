@@ -27,7 +27,7 @@
 (function () {
   "use strict";
 
-  var WIDGET_VERSION = "1.10.0";
+  var WIDGET_VERSION = "1.11.0";
 
   var PIXEL_URL = "https://ueczzuogsj2hnfdr7gwfwuh5sa0oozkm.lambda-url.us-east-2.on.aws/";
 
@@ -254,50 +254,49 @@
     // widget still inherits its font from :host.
     ":host *:not(.katex):not(.katex *) { font-family: " + FONT + " !important; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }",
     "* { box-sizing: border-box; }",
+    // Version 4 badge palette, reused by every piece of chrome: graphite
+    // (charcoal to near-black), a metallic rim (white to dark grey), silver.
+    // A gradient border is drawn as a second background clipped to the
+    // border box, which (unlike border-image) keeps the radius.
+    ":host {",
+    "  --gk-graphite: linear-gradient(160deg, #4a4a4e 0%, #1e1e21 55%, #050506 100%);",
+    "  --gk-rim: linear-gradient(135deg, #f2f2f3 0%, #8a8a8f 45%, #2a2a2d 100%);",
+    "  --gk-silver: linear-gradient(180deg, #ffffff 0%, #b9b9be 100%);",
+    "  --gk-gloss: inset 0 1px 0 rgba(255,255,255,0.28);",
+    "}",
+    // Launcher: a graphite speech bubble reading "GaryAI" in silver, with a
+    // metallic rim, a gloss line, a faint lens ring and a soft black shadow
+    // (white, grey and black only). The button is transparent; the SVG
+    // canvas leaves room for the shadow, hence 88px for a ~72px bubble.
     ".btn {",
-    "  position: fixed; right: 24px; bottom: 24px;",
-    "  width: 60px; height: 60px; border-radius: 50%;",
-    "  border: none; cursor: pointer;",
-    "  background: #000000;",
-    "  color: #fff;",
-    // An even light glow (faint ring + soft halo) rather than a drop shadow.
-    "  box-shadow: 0 0 0 5px rgba(0,0,0,0.07), 0 0 24px 6px rgba(0,0,0,0.22);",
+    "  position: fixed; right: 14px; bottom: 12px;",
+    "  width: 88px; height: 88px; padding: 0;",
+    "  border: none; background: transparent; cursor: pointer;",
+    "  color: #1a1a1a;",
     "  display: flex; align-items: center; justify-content: center;",
     "  z-index: 2147483000;",
     "  transition: transform 0.15s ease;",
+    "  -webkit-tap-highlight-color: transparent;",
     "}",
     ".btn:active { transform: scale(0.94); }",
-    // Closed, the launcher reads "GaryAI" on the black disc; open, the X.
-    ".btn { padding: 0; }",
-    ".btn .icon-chat { font-size: 13px; font-weight: 600; line-height: 1; }",
-    // A light band sweeps left to right across "GaryAI", then rests. The
-    // gradient is clipped to the glyphs; the rest of the text stays a softer
-    // white so the band reads as a glow passing over it.
-    ".btn .icon-chat {",
-    "  color: transparent;",
-    "  background: linear-gradient(110deg, rgba(255,255,255,0.84) 36%, #fff 46%, #fff 54%, rgba(255,255,255,0.84) 64%);",
-    // A soft halo on the glyphs so the passing band reads as light, not just brighter paint.
-    "  filter: drop-shadow(0 0 3px rgba(255,255,255,0.35));",
-    "  background-size: 250% 100%; background-position: 100% 0;",
-    "  -webkit-background-clip: text; background-clip: text;",
-    "  animation: gkShimmer 3.6s ease-in-out infinite;",
+    ".btn .icon-chat { position: relative; display: block; width: 100%; height: 100%; }",
+    ".btn .bubble-svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }",
+    // Open: a clean X in a small white disc with a soft grey glow.
+    ".btn .icon-close {",
+    "  width: 48px; height: 48px; padding: 13px; box-sizing: border-box;",
+    "  color: #ececef; border-radius: 50%; border: 1.5px solid transparent;",
+    "  background: var(--gk-graphite) padding-box, var(--gk-rim) border-box;",
+    "  box-shadow: var(--gk-gloss), 0 4px 12px rgba(0,0,0,0.38);",
     "}",
-    "@keyframes gkShimmer {",
-    "  0% { background-position: 100% 0; }",
-    "  55%, 100% { background-position: 0% 0; }",
-    "}",
-    "@media (prefers-reduced-motion: reduce) {",
-    "  .btn .icon-chat { animation: none; color: #fff; background: none; }",
-    "}",
-    ":host .btn .icon-chat { font-family: ui-sans-serif, system-ui, sans-serif !important; }",
+    ":host .btn .bubble-svg text { font-family: ui-sans-serif, system-ui, sans-serif !important; }",
     ".panel {",
     "  position: fixed; right: 24px; bottom: 100px;",
     "  width: min(380px, calc(100vw - 32px));",
     "  height: min(560px, calc(100vh - 140px));",
-    "  background: #fff;",
     "  border-radius: 16px;",
     "  border: 1px solid #dcdcdc;",
-    "  box-shadow: 0 12px 48px rgba(0,0,0,0.25);",
+    "  background: #fff;",
+    "  box-shadow: 0 18px 50px rgba(0,0,0,0.34), 0 2px 8px rgba(0,0,0,0.16);",
     "  display: flex; flex-direction: column; overflow: hidden;",
     "  z-index: 2147483001;",
     "  color: #333333;",
@@ -306,22 +305,27 @@
     ".panel.fullscreen {",
     "  top: 0; left: 0; right: 0; bottom: 0;",
     "  width: 100%; height: 100%;",
-    "  border-radius: 0; border: none;",
+    "  border-radius: 0; border: none; background: #fff;",
     "  box-shadow: none;",
     "}",
-    // Palette follows the GaryAI Daily Report email (NYT-style): white
-    // header over a hairline rule, black accents, greys, #286ed0 links. The
-    // header is the name alone; Gary's picture sits beside his bubbles.
+    // Controls follow the version 4 launcher badge (graphite, metallic rim,
+    // silver); the header is white over a thin mid-grey rule with the name in
+    // graphite, and the reading area keeps the report email's light bubbles.
+    // The header is the name alone; Gary's picture sits beside his bubbles.
     ".header {",
     "  padding: 12px 16px;",
     "  background: #fff;",
-    "  color: #000000;",
-    "  border-bottom: 1px solid #dcdcdc;",
+    "  color: #1e1e21;",
+    "  border-bottom: 1px solid #9a9a9e;",
     "  display: flex; align-items: center; gap: 10px;",
     "}",
     ".header .title { flex: 1; min-width: 0; }",
     // "GaryAI" everywhere uses the site nav's font (the "Bio & C.V." links).
-    ".header .name { font-size: 16px; font-weight: 600; line-height: 1.2; }",
+    ".header .name {",
+    "  font-size: 16px; font-weight: 600; line-height: 1.2; letter-spacing: 0.02em;",
+    "  color: transparent; background: var(--gk-graphite);",
+    "  -webkit-background-clip: text; background-clip: text;",
+    "}",
     ":host .header .name { font-family: ui-sans-serif, system-ui, sans-serif !important; }",
     ".header .status { font-size: 11px; color: #666666; margin-top: 2px; }",
     ".header .status-dot {",
@@ -464,15 +468,18 @@
     "  color: #333333; outline: none;",
     "  max-height: 120px; line-height: 1.4;",
     "}",
+    ".input-row textarea:focus { border-color: #8a8a8f; }",
+    // Send: flat graphite with a silver icon (no gloss, rim or shadow).
     ".input-row .send {",
     "  width: 38px; height: 38px; border-radius: 50%; border: none;",
-    "  background: #000000;",
-    "  color: #fff; cursor: pointer;",
+    "  background: #1e1e21; color: #ececef; cursor: pointer;",
     "  display: flex; align-items: center; justify-content: center; flex-shrink: 0;",
+    "  transition: background 0.15s;",
     "}",
-    ".input-row .send:disabled { background: #aaaaaa; cursor: not-allowed; }",
-    ".input-row .send.stop { background: #aaaaaa; cursor: pointer; }",
-    ".input-row .send.stop:hover { background: #888888; }",
+    ".input-row .send:hover:not(:disabled) { background: #3a3a3e; }",
+    // Idle (nothing typed): flat light grey, so the live state reads as "on".
+    ".input-row .send:disabled { background: #d4d4d8; color: #fff; cursor: not-allowed; }",
+    ".input-row .send.stop { cursor: pointer; }",
     // Attach button. Unlike the full-page pill, .input-row has no overflow:hidden,
     // so this drops in with no cap-radius treatment needed.
     ".input-row .attach {",
@@ -557,8 +564,9 @@
     "  cursor: pointer; font-family: inherit;",
     "}",
     ".feedback-comment button.primary {",
-    "  background: #000000;",
-    "  border-color: transparent; color: #fff;",
+    "  border: 1px solid transparent; color: #ececef;",
+    "  background: var(--gk-graphite) padding-box, var(--gk-rim) border-box;",
+    "  box-shadow: var(--gk-gloss);",
     "}",
     ".session-rating {",
     "  position: relative;",
@@ -599,8 +607,9 @@
     "  cursor: pointer; font-family: inherit;",
     "}",
     ".sr-actions button.primary {",
-    "  background: #000000;",
-    "  border-color: transparent; color: #fff;",
+    "  border: 1px solid transparent; color: #ececef;",
+    "  background: var(--gk-graphite) padding-box, var(--gk-rim) border-box;",
+    "  box-shadow: var(--gk-gloss);",
     "}",
     ".footer {",
     "  padding: 6px 12px 8px; background: #fff;",
@@ -643,8 +652,9 @@
     "  cursor: pointer; font-family: inherit;",
     "}",
     ".modal button.primary {",
-    "  background: #000000;",
-    "  border-color: transparent; color: #fff;",
+    "  border: 1px solid transparent; color: #ececef;",
+    "  background: var(--gk-graphite) padding-box, var(--gk-rim) border-box;",
+    "  box-shadow: var(--gk-gloss);",
     "}",
     ".figures {",
     "  margin-top: 10px; padding-top: 8px;",
@@ -807,7 +817,7 @@
     // transcript still reads correctly; it just can't be sent again.
     ".chip.expired { opacity: 0.55; }",
     "@media (max-width: 600px) {",
-    "  .btn { right: 16px; bottom: 16px; width: 52px; height: 52px; }",
+    "  .btn { right: 8px; bottom: 6px; width: 74px; height: 74px; }",
     "  .panel {",
     "    position: fixed; inset: 0;",
     "    width: 100%; height: 100%;",
@@ -837,7 +847,36 @@
 
   var TEMPLATE = [
     '<button class="btn" type="button" aria-label="Open chat">',
-    '  <span class="icon-chat">GaryAI</span>',
+    '  <span class="icon-chat">',
+    '    <svg class="bubble-svg" viewBox="0 0 120 120" aria-hidden="true">',
+    '      <defs>',
+    '        <linearGradient id="gk-v4-body" x1="0.2" y1="0" x2="0.8" y2="1">',
+    '          <stop offset="0" stop-color="#4a4a4e"/><stop offset="0.5" stop-color="#1e1e21"/><stop offset="1" stop-color="#050506"/>',
+    '        </linearGradient>',
+    '        <linearGradient id="gk-v4-rim" x1="0" y1="0" x2="1" y2="1">',
+    '          <stop offset="0" stop-color="#f2f2f3"/><stop offset="0.45" stop-color="#8a8a8f"/><stop offset="1" stop-color="#2a2a2d"/>',
+    '        </linearGradient>',
+    '        <linearGradient id="gk-v4-text" x1="0" y1="0" x2="0" y2="1">',
+    '          <stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#b9b9be"/>',
+    '        </linearGradient>',
+    '        <linearGradient id="gk-v4-gloss" x1="0" y1="0" x2="0" y2="1">',
+    '          <stop offset="0" stop-color="#ffffff" stop-opacity="0.34"/><stop offset="1" stop-color="#ffffff" stop-opacity="0"/>',
+    '        </linearGradient>',
+    '        <clipPath id="gk-v4-clip"><path d="M21.4 71.7 A40 40 0 1 1 33.2 81.3 Q24 84 15 86 Q18 79 21.4 71.7 Z"/></clipPath>',
+    '        <filter id="gk-v4-shadow" x="-25%" y="-25%" width="150%" height="160%"><feDropShadow dx="0" dy="3" stdDeviation="3.2" flood-color="#000" flood-opacity="0.38"/></filter>',
+    '        <filter id="gk-v4-glow" x="-20%" y="-40%" width="140%" height="180%"><feGaussianBlur stdDeviation="1.1" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>',
+    '      </defs>',
+    '      <g transform="translate(8,8)">',
+    '        <path d="M21.4 71.7 A40 40 0 1 1 33.2 81.3 Q24 84 15 86 Q18 79 21.4 71.7 Z" fill="url(#gk-v4-body)" filter="url(#gk-v4-shadow)"/>',
+    '        <g clip-path="url(#gk-v4-clip)">',
+    '          <ellipse cx="52" cy="14" rx="38" ry="20" fill="url(#gk-v4-gloss)"/>',
+    '          <circle cx="52" cy="46" r="33.5" fill="none" stroke="#ffffff" stroke-opacity="0.1" stroke-width="0.8"/>',
+    '        </g>',
+    '        <path d="M21.4 71.7 A40 40 0 1 1 33.2 81.3 Q24 84 15 86 Q18 79 21.4 71.7 Z" fill="none" stroke="url(#gk-v4-rim)" stroke-width="1.5" stroke-linejoin="round"/>',
+    '        <text x="52" y="46.5" text-anchor="middle" dominant-baseline="central" font-size="19" font-weight="600" letter-spacing="0.4" fill="url(#gk-v4-text)" filter="url(#gk-v4-glow)">GaryAI</text>',
+    '      </g>',
+    '    </svg>',
+    '  </span>',
     '  <svg class="icon-close" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" style="display:none;">',
     '    <line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/>',
     '  </svg>',
