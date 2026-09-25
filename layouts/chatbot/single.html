@@ -78,7 +78,7 @@
     border-radius: 9px; cursor: pointer;
   }
   .gk-hist-item:hover { background: #f5f5f5; }
-  .gk-hist-item.is-active { background: #efefef; box-shadow: inset 2px 0 0 #000000; }
+  .gk-hist-item.is-active { background: #edf2f8; box-shadow: inset 2px 0 0 #56657d; }
   .gk-hist-title {
     display: block; font-size: 13.5px; line-height: 1.35; font-weight: 600;
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
@@ -143,21 +143,20 @@
     padding: 32px 16px 0;
     flex-shrink: 0;
   }
-  /* Palette follows the GaryAI Daily Report email (NYT-style): black and
-     greys, #286ed0 links. Controls and the "GaryAI" name use the widget's
-     version 4 launcher palette (graphite, metallic rim, silver). "GaryAI"
-     uses the site nav's font (the "Bio & C.V." links). A gradient border is
-     a second background clipped to the border box, which keeps the radius. */
+  /* Palette follows the widget's launcher badge: a pale #edf2f8 body,
+     blue-grey lines, slate controls and text; #286ed0 links. "GaryAI" uses
+     the site nav's font (the "Bio & C.V." links). */
   :root {
-    --gk-graphite: linear-gradient(160deg, #4a4a4e 0%, #1e1e21 55%, #050506 100%);
-    --gk-rim: linear-gradient(135deg, #f2f2f3 0%, #8a8a8f 45%, #2a2a2d 100%);
-    --gk-gloss: inset 0 1px 0 rgba(255,255,255,0.28);
+    --gk-ink: linear-gradient(180deg, #5d6c86 0%, #333f55 100%);
+    --gk-slate: #46546b;
+    --gk-slate-deep: #333f55;
+    --gk-line: #d3dbe7;
   }
   .gk-chat-header h1 {
     font-family: ui-sans-serif, system-ui, sans-serif;
     font-size: clamp(18px, 4vw, 32px);
     font-weight: 600; margin: 0 0 6px; letter-spacing: -0.02em;
-    color: transparent; background: var(--gk-graphite);
+    color: transparent; background: var(--gk-ink);
     -webkit-background-clip: text; background-clip: text;
   }
   .gk-masthead-avatar {
@@ -201,12 +200,12 @@
   }
   .gk-msg.user .gk-bubble {
     border-radius: 16px 16px 4px 16px;
-    background: #e8e8e8; color: #333333;
+    background: #e3e9f2; color: #333333;
   }
   .gk-msg.bot .gk-bubble {
     border-radius: 16px 16px 16px 4px;
     background: #fff; color: #333333;
-    border: 1px solid #dcdcdc;
+    border: 1px solid var(--gk-line);
   }
   .gk-bubble strong { color: #000000; font-weight: 700; }
   .gk-bubble code {
@@ -333,9 +332,8 @@
     cursor: pointer; font-family: inherit;
   }
   .gk-fb-comment button.primary {
-    border: 1px solid transparent; color: #ececef;
-    background: var(--gk-graphite) padding-box, var(--gk-rim) border-box;
-    box-shadow: var(--gk-gloss);
+    border: 1px solid transparent; color: #fff;
+    background: var(--gk-slate);
   }
 
   .gk-session-rating {
@@ -377,9 +375,8 @@
     cursor: pointer; font-family: inherit;
   }
   .gk-sr-actions button.primary {
-    border: 1px solid transparent; color: #ececef;
-    background: var(--gk-graphite) padding-box, var(--gk-rim) border-box;
-    box-shadow: var(--gk-gloss);
+    border: 1px solid transparent; color: #fff;
+    background: var(--gk-slate);
   }
 
   .gk-figures {
@@ -467,7 +464,7 @@
   }
   .gk-input-row {
     display: flex; gap: 10px; align-items: flex-end;
-    border: 1.5px solid #dcdcdc; border-radius: 28px;
+    border: 1.5px solid var(--gk-line); border-radius: 28px;
     background: #fff; overflow: hidden;
     box-shadow: 0 2px 20px rgba(0,0,0,0.08);
   }
@@ -479,18 +476,18 @@
     max-height: 120px;
   }
   .gk-input-row textarea::placeholder { color: #aaaaaa; }
-  .gk-input-row:focus-within { border-color: #8a8a8f; }
+  .gk-input-row:focus-within { border-color: #94a3b9; }
   /* Same flat round send button as the widget: light grey while there is
-     nothing to send, graphite with a silver icon when live. */
+     nothing to send, slate with a white icon when live. */
   .gk-input-row .gk-send {
     width: 38px; height: 38px; margin: 4px 5px 4px 0; padding: 0;
     flex-shrink: 0; border-radius: 50%; border: none;
     display: flex; align-items: center; justify-content: center;
-    background: #1e1e21; color: #ececef; cursor: pointer;
+    background: var(--gk-slate); color: #fff; cursor: pointer;
     transition: background 0.15s;
   }
-  .gk-input-row .gk-send:hover:not(:disabled) { background: #3a3a3e; }
-  .gk-input-row .gk-send:disabled { background: #d4d4d8; color: #fff; cursor: not-allowed; }
+  .gk-input-row .gk-send:hover:not(:disabled) { background: var(--gk-slate-deep); }
+  .gk-input-row .gk-send:disabled { background: var(--gk-line); color: #fff; cursor: not-allowed; }
 
   /* Attach button. The row has overflow:hidden, so this needs its own left cap
      radius, mirroring how .gk-send caps the right. */
@@ -604,9 +601,8 @@
     cursor: pointer; font-family: inherit;
   }
   .gk-modal button.primary {
-    border: 1px solid transparent; color: #ececef;
-    background: var(--gk-graphite) padding-box, var(--gk-rim) border-box;
-    box-shadow: var(--gk-gloss);
+    border: 1px solid transparent; color: #fff;
+    background: var(--gk-slate);
   }
 
   /* Touch Safari (iPad) auto-zooms the page when focusing an input below
@@ -746,7 +742,7 @@
   // Grey head-and-shoulders disc beside user turns (same as the widget).
   var USER_ICON_SVG =
     '<svg class="gk-avatar-user" viewBox="0 0 26 26" aria-hidden="true">' +
-    '<rect width="26" height="26" fill="#666666"/>' +
+    '<rect width="26" height="26" fill="#7d8ba1"/>' +
     '<g fill="#fff"><circle cx="13" cy="9.1" r="4.2"/><ellipse cx="13" cy="22.2" rx="8.8" ry="7.5"/></g>' +
     '</svg>';
   function avatarHtml() {

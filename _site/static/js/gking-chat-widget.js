@@ -27,7 +27,7 @@
 (function () {
   "use strict";
 
-  var WIDGET_VERSION = "1.11.0";
+  var WIDGET_VERSION = "1.12.0";
 
   var PIXEL_URL = "https://ueczzuogsj2hnfdr7gwfwuh5sa0oozkm.lambda-url.us-east-2.on.aws/";
 
@@ -235,7 +235,7 @@
   var FONT = "'Helvetica Neue', Arial, sans-serif";
   var USER_ICON_SVG =
     '<svg class="avatar-user" viewBox="0 0 26 26" aria-hidden="true">' +
-    '<rect width="26" height="26" fill="#666666"/>' +
+    '<rect width="26" height="26" fill="#7d8ba1"/>' +
     '<g fill="#fff"><circle cx="13" cy="9.1" r="4.2"/><ellipse cx="13" cy="22.2" rx="8.8" ry="7.5"/></g>' +
     "</svg>";
   var CSS = [
@@ -254,19 +254,21 @@
     // widget still inherits its font from :host.
     ":host *:not(.katex):not(.katex *) { font-family: " + FONT + " !important; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }",
     "* { box-sizing: border-box; }",
-    // Version 4 badge palette, reused by every piece of chrome: graphite
-    // (charcoal to near-black), a metallic rim (white to dark grey), silver.
-    // A gradient border is drawn as a second background clipped to the
-    // border box, which (unlike border-image) keeps the radius.
+    // The launcher badge's palette, reused by all the chrome: a pale
+    // #edf2f8 body, a white-to-slate rim, slate text. A gradient border is
+    // drawn as a second background clipped to the border box, which (unlike
+    // border-image) keeps the radius.
     ":host {",
-    "  --gk-graphite: linear-gradient(160deg, #4a4a4e 0%, #1e1e21 55%, #050506 100%);",
-    "  --gk-rim: linear-gradient(135deg, #f2f2f3 0%, #8a8a8f 45%, #2a2a2d 100%);",
-    "  --gk-silver: linear-gradient(180deg, #ffffff 0%, #b9b9be 100%);",
-    "  --gk-gloss: inset 0 1px 0 rgba(255,255,255,0.28);",
+    "  --gk-badge: linear-gradient(160deg, #f8fafd 0%, #edf2f8 50%, #bfcbdc 100%);",
+    "  --gk-rim: linear-gradient(135deg, #ffffff 0%, #94a3b9 45%, #56657d 100%);",
+    "  --gk-ink: linear-gradient(180deg, #5d6c86 0%, #333f55 100%);",
+    "  --gk-slate: #46546b;",
+    "  --gk-slate-deep: #333f55;",
+    "  --gk-line: #d3dbe7;",
     "}",
-    // Launcher: a graphite speech bubble reading "GaryAI" in silver, with a
-    // metallic rim, a gloss line, a faint lens ring and a soft black shadow
-    // (white, grey and black only). The button is transparent; the SVG
+    // Launcher: a light #edf2f8 speech bubble reading "GaryAI" in a
+    // tone-on-tone blue-grey, with a white-to-blue-grey rim, a gloss line and
+    // a soft cool-grey shadow. The button is transparent; the SVG
     // canvas leaves room for the shadow, hence 88px for a ~72px bubble.
     ".btn {",
     "  position: fixed; right: 14px; bottom: 12px;",
@@ -284,9 +286,9 @@
     // Open: a clean X in a small white disc with a soft grey glow.
     ".btn .icon-close {",
     "  width: 48px; height: 48px; padding: 13px; box-sizing: border-box;",
-    "  color: #ececef; border-radius: 50%; border: 1.5px solid transparent;",
-    "  background: var(--gk-graphite) padding-box, var(--gk-rim) border-box;",
-    "  box-shadow: var(--gk-gloss), 0 4px 12px rgba(0,0,0,0.38);",
+    "  color: var(--gk-slate-deep); border-radius: 50%; border: 1.5px solid transparent;",
+    "  background: var(--gk-badge) padding-box, var(--gk-rim) border-box;",
+    "  box-shadow: 0 3px 9px rgba(93,107,130,0.42);",
     "}",
     ":host .btn .bubble-svg text { font-family: ui-sans-serif, system-ui, sans-serif !important; }",
     ".panel {",
@@ -294,7 +296,7 @@
     "  width: min(380px, calc(100vw - 32px));",
     "  height: min(560px, calc(100vh - 140px));",
     "  border-radius: 16px;",
-    "  border: 1px solid #dcdcdc;",
+    "  border: 1px solid var(--gk-line);",
     "  background: #fff;",
     "  box-shadow: 0 18px 50px rgba(0,0,0,0.34), 0 2px 8px rgba(0,0,0,0.16);",
     "  display: flex; flex-direction: column; overflow: hidden;",
@@ -308,22 +310,22 @@
     "  border-radius: 0; border: none; background: #fff;",
     "  box-shadow: none;",
     "}",
-    // Controls follow the version 4 launcher badge (graphite, metallic rim,
-    // silver); the header is white over a thin mid-grey rule with the name in
-    // graphite, and the reading area keeps the report email's light bubbles.
+    // Everything follows the launcher badge's pale blue-grey and slate: the
+    // header is white over a thin blue-grey rule with the name in the badge's
+    // slate text gradient.
     // The header is the name alone; Gary's picture sits beside his bubbles.
     ".header {",
     "  padding: 12px 16px;",
     "  background: #fff;",
-    "  color: #1e1e21;",
-    "  border-bottom: 1px solid #9a9a9e;",
+    "  color: var(--gk-slate-deep);",
+    "  border-bottom: 1px solid #94a3b9;",
     "  display: flex; align-items: center; gap: 10px;",
     "}",
     ".header .title { flex: 1; min-width: 0; }",
     // "GaryAI" everywhere uses the site nav's font (the "Bio & C.V." links).
     ".header .name {",
     "  font-size: 16px; font-weight: 600; line-height: 1.2; letter-spacing: 0.02em;",
-    "  color: transparent; background: var(--gk-graphite);",
+    "  color: transparent; background: var(--gk-ink);",
     "  -webkit-background-clip: text; background-clip: text;",
     "}",
     ":host .header .name { font-family: ui-sans-serif, system-ui, sans-serif !important; }",
@@ -341,7 +343,7 @@
     "  flex: 1; overflow-y: auto;",
     "  padding: 14px 14px 6px;",
     "  display: flex; flex-direction: column; gap: 12px;",
-    "  background: #f7f7f7;",
+    "  background: #f3f6fb;",
     "}",
     ".msg { display: flex; gap: 8px; align-items: flex-start; }",
     // User turns: time stamp above a right-aligned bubble, user icon at the
@@ -365,12 +367,12 @@
     "}",
     ".msg.user .bubble {",
     "  border-radius: 14px 14px 4px 14px;",
-    "  background: #e8e8e8; color: #333333;",
+    "  background: #e3e9f2; color: #333333;",
     "}",
     ".msg.bot .bubble {",
     "  border-radius: 14px 14px 14px 4px;",
     "  background: #fff; color: #333333;",
-    "  border: 1px solid #dcdcdc;",
+    "  border: 1px solid var(--gk-line);",
     "}",
     ".bubble strong { color: #000000; font-weight: 700; }",
     ".bubble code {",
@@ -457,28 +459,28 @@
     "}",
     ".input-row {",
     "  padding: 12px; background: #fff;",
-    "  border-top: 1px solid #dcdcdc;",
+    "  border-top: 1px solid #e3e9f2;",
     "  display: flex; gap: 8px; align-items: flex-end;",
     "}",
     ".input-row textarea {",
     "  flex: 1; resize: none;",
-    "  border: 1px solid #dcdcdc; border-radius: 10px;",
+    "  border: 1px solid var(--gk-line); border-radius: 10px;",
     "  padding: 9px 12px; font-size: 14px;",
     "  font-family: 'Helvetica Neue', Arial, sans-serif;",
     "  color: #333333; outline: none;",
     "  max-height: 120px; line-height: 1.4;",
     "}",
-    ".input-row textarea:focus { border-color: #8a8a8f; }",
-    // Send: flat graphite with a silver icon (no gloss, rim or shadow).
+    ".input-row textarea:focus { border-color: #94a3b9; }",
+    // Send: flat slate with a white icon (no gloss, rim or shadow).
     ".input-row .send {",
     "  width: 38px; height: 38px; border-radius: 50%; border: none;",
-    "  background: #1e1e21; color: #ececef; cursor: pointer;",
+    "  background: var(--gk-slate); color: #fff; cursor: pointer;",
     "  display: flex; align-items: center; justify-content: center; flex-shrink: 0;",
     "  transition: background 0.15s;",
     "}",
-    ".input-row .send:hover:not(:disabled) { background: #3a3a3e; }",
-    // Idle (nothing typed): flat light grey, so the live state reads as "on".
-    ".input-row .send:disabled { background: #d4d4d8; color: #fff; cursor: not-allowed; }",
+    ".input-row .send:hover:not(:disabled) { background: var(--gk-slate-deep); }",
+    // Idle (nothing typed): flat pale blue-grey, so the live state reads as "on".
+    ".input-row .send:disabled { background: var(--gk-line); color: #fff; cursor: not-allowed; }",
     ".input-row .send.stop { cursor: pointer; }",
     // Attach button. Unlike the full-page pill, .input-row has no overflow:hidden,
     // so this drops in with no cap-radius treatment needed.
@@ -564,9 +566,8 @@
     "  cursor: pointer; font-family: inherit;",
     "}",
     ".feedback-comment button.primary {",
-    "  border: 1px solid transparent; color: #ececef;",
-    "  background: var(--gk-graphite) padding-box, var(--gk-rim) border-box;",
-    "  box-shadow: var(--gk-gloss);",
+    "  border: 1px solid transparent; color: #fff;",
+    "  background: var(--gk-slate);",
     "}",
     ".session-rating {",
     "  position: relative;",
@@ -607,9 +608,8 @@
     "  cursor: pointer; font-family: inherit;",
     "}",
     ".sr-actions button.primary {",
-    "  border: 1px solid transparent; color: #ececef;",
-    "  background: var(--gk-graphite) padding-box, var(--gk-rim) border-box;",
-    "  box-shadow: var(--gk-gloss);",
+    "  border: 1px solid transparent; color: #fff;",
+    "  background: var(--gk-slate);",
     "}",
     ".footer {",
     "  padding: 6px 12px 8px; background: #fff;",
@@ -652,9 +652,8 @@
     "  cursor: pointer; font-family: inherit;",
     "}",
     ".modal button.primary {",
-    "  border: 1px solid transparent; color: #ececef;",
-    "  background: var(--gk-graphite) padding-box, var(--gk-rim) border-box;",
-    "  box-shadow: var(--gk-gloss);",
+    "  border: 1px solid transparent; color: #fff;",
+    "  background: var(--gk-slate);",
     "}",
     ".figures {",
     "  margin-top: 10px; padding-top: 8px;",
@@ -783,7 +782,7 @@
     "  border-radius: 8px; color: #333333;",
     "}",
     ".hist-item:hover { background: #f5f5f5; }",
-    ".hist-item.is-active { background: #efefef; box-shadow: inset 2px 0 0 #000000; }",
+    ".hist-item.is-active { background: #edf2f8; box-shadow: inset 2px 0 0 #56657d; }",
     ".hist-title {",
     "  display: block; font-size: 13px; line-height: 1.35; font-weight: 600;",
     "  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;",
@@ -850,30 +849,31 @@
     '  <span class="icon-chat">',
     '    <svg class="bubble-svg" viewBox="0 0 120 120" aria-hidden="true">',
     '      <defs>',
-    '        <linearGradient id="gk-v4-body" x1="0.2" y1="0" x2="0.8" y2="1">',
-    '          <stop offset="0" stop-color="#4a4a4e"/><stop offset="0.5" stop-color="#1e1e21"/><stop offset="1" stop-color="#050506"/>',
-    '        </linearGradient>',
-    '        <linearGradient id="gk-v4-rim" x1="0" y1="0" x2="1" y2="1">',
-    '          <stop offset="0" stop-color="#f2f2f3"/><stop offset="0.45" stop-color="#8a8a8f"/><stop offset="1" stop-color="#2a2a2d"/>',
-    '        </linearGradient>',
-    '        <linearGradient id="gk-v4-text" x1="0" y1="0" x2="0" y2="1">',
-    '          <stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#b9b9be"/>',
-    '        </linearGradient>',
-    '        <linearGradient id="gk-v4-gloss" x1="0" y1="0" x2="0" y2="1">',
-    '          <stop offset="0" stop-color="#ffffff" stop-opacity="0.34"/><stop offset="1" stop-color="#ffffff" stop-opacity="0"/>',
-    '        </linearGradient>',
-    '        <clipPath id="gk-v4-clip"><path d="M21.4 71.7 A40 40 0 1 1 33.2 81.3 Q24 84 15 86 Q18 79 21.4 71.7 Z"/></clipPath>',
-    '        <filter id="gk-v4-shadow" x="-25%" y="-25%" width="150%" height="160%"><feDropShadow dx="0" dy="3" stdDeviation="3.2" flood-color="#000" flood-opacity="0.38"/></filter>',
-    '        <filter id="gk-v4-glow" x="-20%" y="-40%" width="140%" height="180%"><feGaussianBlur stdDeviation="1.1" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>',
+    '      <linearGradient id="gk-lb-body" x1="0.2" y1="0" x2="0.8" y2="1">',
+    '      <stop offset="0" stop-color="#f8fafd"/><stop offset="0.5" stop-color="#edf2f8"/><stop offset="1" stop-color="#bfcbdc"/>',
+    '      </linearGradient>',
+    '      <linearGradient id="gk-lb-rim" x1="0" y1="0" x2="1" y2="1">',
+    '      <stop offset="0" stop-color="#ffffff"/><stop offset="0.45" stop-color="#94a3b9"/><stop offset="1" stop-color="#56657d"/>',
+    '      </linearGradient>',
+    '      <linearGradient id="gk-lb-text" x1="0" y1="0" x2="0" y2="1">',
+    '      <stop offset="0" stop-color="#5d6c86"/><stop offset="1" stop-color="#333f55"/>',
+    '      </linearGradient>',
+    '      <linearGradient id="gk-lb-gloss" x1="0" y1="0" x2="0" y2="1">',
+    '      <stop offset="0" stop-color="#ffffff" stop-opacity="0.85"/><stop offset="1" stop-color="#ffffff" stop-opacity="0"/>',
+    '      </linearGradient>',
+    '      <clipPath id="gk-lb-clip"><path d="M21.4 71.7 A40 40 0 1 1 33.2 81.3 Q24 84 15 86 Q18 79 21.4 71.7 Z"/></clipPath>',
+    '      <filter id="gk-lb-shadow" x="-25%" y="-25%" width="150%" height="160%">',
+    '      <feDropShadow dx="0" dy="3" stdDeviation="3.2" flood-color="#5d6b82" flood-opacity="0.42"/>',
+    '      </filter>',
     '      </defs>',
     '      <g transform="translate(8,8)">',
-    '        <path d="M21.4 71.7 A40 40 0 1 1 33.2 81.3 Q24 84 15 86 Q18 79 21.4 71.7 Z" fill="url(#gk-v4-body)" filter="url(#gk-v4-shadow)"/>',
-    '        <g clip-path="url(#gk-v4-clip)">',
-    '          <ellipse cx="52" cy="14" rx="38" ry="20" fill="url(#gk-v4-gloss)"/>',
-    '          <circle cx="52" cy="46" r="33.5" fill="none" stroke="#ffffff" stroke-opacity="0.1" stroke-width="0.8"/>',
-    '        </g>',
-    '        <path d="M21.4 71.7 A40 40 0 1 1 33.2 81.3 Q24 84 15 86 Q18 79 21.4 71.7 Z" fill="none" stroke="url(#gk-v4-rim)" stroke-width="1.5" stroke-linejoin="round"/>',
-    '        <text x="52" y="46.5" text-anchor="middle" dominant-baseline="central" font-size="19" font-weight="600" letter-spacing="0.4" fill="url(#gk-v4-text)" filter="url(#gk-v4-glow)">GaryAI</text>',
+    '      <path d="M21.4 71.7 A40 40 0 1 1 33.2 81.3 Q24 84 15 86 Q18 79 21.4 71.7 Z" fill="url(#gk-lb-body)" filter="url(#gk-lb-shadow)"/>',
+    '      <g clip-path="url(#gk-lb-clip)">',
+    '      <ellipse cx="52" cy="14" rx="38" ry="20" fill="url(#gk-lb-gloss)"/>',
+    '      </g>',
+    '      <path d="M21.4 71.7 A40 40 0 1 1 33.2 81.3 Q24 84 15 86 Q18 79 21.4 71.7 Z" fill="none" stroke="url(#gk-lb-rim)" stroke-width="1.5" stroke-linejoin="round"/>',
+    '      <text x="52" y="47.1" text-anchor="middle" dominant-baseline="central" font-size="19" font-weight="600" letter-spacing="0.4" fill="#ffffff" opacity="0.8">GaryAI</text>',
+    '      <text x="52" y="46.5" text-anchor="middle" dominant-baseline="central" font-size="19" font-weight="600" letter-spacing="0.4" fill="url(#gk-lb-text)">GaryAI</text>',
     '      </g>',
     '    </svg>',
     '  </span>',
