@@ -163,6 +163,9 @@
     display: flex; flex-direction: column; gap: 14px;
   }
   .gk-chat.gk-empty .gk-chat-messages { display: none; }
+  /* The picture + "GaryAI" masthead is a welcome: it goes once the first
+     message is in, and comes back with "New chat". */
+  .gk-chat:not(.gk-empty) .gk-chat-header { display: none; }
   .gk-chat.gk-empty .gk-chat-header { flex: 1; display: flex; flex-direction: column; justify-content: flex-end; padding-bottom: 16px; }
   .gk-chat.gk-empty .gk-input-area { flex: 0; }
   .gk-chat.gk-empty .gk-footer { flex: 1; padding-top: 8px; }
