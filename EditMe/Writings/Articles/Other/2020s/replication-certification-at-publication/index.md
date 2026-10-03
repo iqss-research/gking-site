@@ -15,7 +15,7 @@ links:
   - type: pdf
     url: files/replication-certification.pdf
   - type: appendix
-    label: Supplementary Appendix
+    label: Appendix
     url: files/replication-certification-supp.pdf
 image:
   alt_text: "Certification at a glance, in three cards: how it works (the author readies a dataset, the archive certifies one run, anyone checks it), why the record is proof, and what each party pays today and gains once certified"
