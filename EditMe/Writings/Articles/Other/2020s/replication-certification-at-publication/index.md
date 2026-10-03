@@ -2,7 +2,7 @@
 title: "Replication Certification at Publication: Checkable by Anyone, Anywhere, in Seconds, Forever"
 slug: "replication-certification-at-publication"
 url: /certify/
-date: '2026-10-01'
+date: '2026-10-02'
 authors:
   - Gary King
   - Yiqing Xu
@@ -10,7 +10,7 @@ authors:
 publication_types:
   - working_paper
 abstract: |-
-  Authors increasingly deposit replication datasets—the data and code behind published results—in archives such as Dataverse, and journals increasingly require it. But a deposit alone proves little, so authors keep paying: months while a data editor reruns analyses, years answering readers’ questions, and rancor as failed replications become accusations because no record establishes what actually ran. We introduce a certificate: a cryptographically signed record of the deposited files and output captured by specialized logging software. It replaces the data editor’s rerun with evidence of the author’s own run that anyone can check, which no one, including the archive, can backdate, and no one can fake without risking detection. Certification asks little of anyone and benefits everyone: The author deposits, then reruns the analysis one extra time; the archive automatically hashes, signs, timestamps it in Bitcoin’s blockchain, and stores the record—confidential data included, under restricted access, where licenses allow—but never runs the analysis; the journal simply checks a website that the certificate exists; and anyone can verify the record in seconds, or replay any step of it, even decades later.
+  Authors increasingly deposit replication datasets—the data and code behind published results—in archives such as Dataverse, and journals increasingly require it. But a deposit alone proves little, so authors keep paying: months while a data editor reruns analyses, years answering readers’ questions, and rancor as failed replications become accusations because no record establishes what actually ran. We introduce a certificate: a cryptographically signed record of the deposited files and output captured by specialized logging software. It replaces the data editor’s rerun with evidence of the author’s own run that anyone can check on their own, which no one, including the archive, can backdate, and no one can fake without risking detection. Certification asks little of anyone and benefits everyone: The author deposits, then reruns the analysis one extra time; the archive automatically hashes, signs, timestamps it in Bitcoin’s blockchain, and stores the record—confidential data included, under restricted access, where licenses allow—but never runs the analysis; the journal simply checks a website that the certificate exists; and anyone can verify the record in seconds, or replay any step of it, even decades later.
 links:
   - type: pdf
     url: files/replication-certification.pdf
