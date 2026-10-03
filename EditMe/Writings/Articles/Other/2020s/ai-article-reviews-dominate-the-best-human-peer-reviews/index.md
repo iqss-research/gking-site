@@ -14,7 +14,7 @@ links:
   - type: pdf
     url: files/peerless.pdf
   - type: appendix
-    label: Supplementary Appendix
+    label: Appendix
     url: files/peerless-supp.pdf
 image:
   alt_text: "Figure 1 of the paper, in two panels: pairwise rankings, where the AI review is ranked above the human review in 87 to 100 percent of pairs overall and in every review area, and individual ratings on a 0 to 10 scale, where AI reviews are rated higher than human reviews overall and in every review area"
