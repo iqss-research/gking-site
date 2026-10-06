@@ -12,9 +12,15 @@
 # by last name.
 
 sites:
+  - name: "Matthew Fails"
+    affiliation: "Oakland University, Department of Political Science"
+    url: "https://matthewfails.github.io/matthewfails-site/"
   - name: "Gary King"
     affiliation: "Harvard University, Institute for Quantitative Social Science"
     url: "https://gking.harvard.edu/"
+  - name: "Elise Sheinberg"
+    affiliation: "Harvard T.H. Chan School of Public Health, Department of Nutrition"
+    url: "https://egahan23.github.io/esheinberg.github.io/"
   - name: "Brandon M. Stewart"
     affiliation: "Princeton University, Department of Sociology"
     url: "https://brandonstewart.org/"
