@@ -3,7 +3,7 @@ title: "Build Your Academic Website in 15 Minutes"
 slug: "mysite"
 url: /mysite/
 date: '2026-06-16'
-lastmod: '2026-06-22'
+lastmod: '2026-10-06'
 type: mysite
 summary: "A startup guide for graduate students and senior researchers — build a full academic website with AI, hosted for free. No coding required."
 
@@ -12,6 +12,10 @@ summary: "A startup guide for graduate students and senior researchers — build
 # layouts/_partials/hooks/head-start/gk-mysite-discovery.html). There is no
 # public sign-up form — that was removed to avoid spam and gamed URLs. Listed
 # sites live in data/mysite_sites.yaml.
+#
+# Each site's look is drawn at random and refined (the "design quest",
+# _site/static/mysite/files/QUEST_DESIGN.md, after GaryKing.org/quest) so the
+# sites do not converge on one design. Both *_SITE_PROMPT.md files call it.
 
 # --- Information forms (embedded inside the "Get your information form" step).
 #     These are short intake docs: the person fills in only the "Who I Am"

@@ -309,14 +309,13 @@ type: landing
 
 The `landing/list.html` layout renders: hero section with bio photo + brief intro, and research areas below displayed as **collapsible dropdown accordions** — each research area is a clickable header that expands to reveal its associated publications, talks, and software. Do NOT list all publications flat under each area; use a compact summary (3–5 featured items per area) with a "View all →" link to the filtered writings page. This keeps the homepage scannable rather than overwhelming.
 
-### Homepage Layout Rules (DO NOT CHANGE)
+### Homepage Layout Rules
 
-The homepage hero **must** use a side-by-side layout:
+The homepage hero holds the photo and the text block (name, title, institution, intro, buttons). **Its arrangement comes from the design brief drawn in the quest** (see *Design quest* under *CSS / Styling Approach*; <https://gking.harvard.edu/mysite/files/QUEST_DESIGN.md>) — photo left, photo right, a banner with the photo set in, text-first with a small photo, or a large photo above a two-column intro. Do not default to photo-left-text-right out of habit.
 
-- **Photo on the LEFT**, text block (name, title, institution, intro, buttons) on the **RIGHT**.
-- On mobile (≤ 640px), stack vertically (photo on top, text below, centered).
-- The photo should be circular, approximately 200px, vertically aligned to the top of the text block.
-- This is the standard academic homepage layout. Do NOT center the photo above the text on desktop — that looks like a social media profile, not a professional academic page.
+- On mobile (≤ 640px), whatever the arrangement, stack vertically (photo on top, text below, centered).
+- The photo's shape and size come from the brief (circle, square, rounded, arched, or natural aspect; about 180–240px on desktop), aligned with the top of the text block when side by side.
+- Whatever the arrangement, it must still read as a professional academic page: the name and affiliation are the first things a reader sees, and the intro is not pushed below the fold.
 - **The "Research Areas" nav link (`/#research-areas`) must scroll to the TOP of the research-areas section, not the bottom of the page.** Put `id="research-areas"` on the section's heading/wrapper and give it `scroll-margin-top` equal to the fixed navbar height so the section lands just below the navbar. A frequent bug is the anchor jumping to the page bottom (id placed after the section, or the fixed header not accounted for) — verify the click lands on the section heading.
 - **Style links and buttons consistently within a section.** Don't render some actions as buttons while their siblings are plain text links — e.g. don't make "Bio & C.V." a button while "View all →" is an unstyled link. Choose one treatment for primary actions and one for inline links and apply them uniformly, or the page looks half-finished.
 
@@ -330,6 +329,7 @@ The navbar **must** follow this structure:
 - **Search** represented as a **plain magnifying glass icon only** — no text label, no button border/background. Just the icon, clickable.
 - **The header's horizontal padding must match its vertical padding** on desktop, so the bar feels balanced — align the brand and nav with the page's content gutter rather than letting them sit flush against the window edges.
 - On mobile, nav links collapse into a hamburger menu. **Keep the brand top-left and the hamburger toggle aligned to the far RIGHT — never floating in the center of the bar.** When opened, it expands into a clean, full-width stacked menu (one link per row, generous tap targets), not a misaligned, half-width, or overlapping dropdown. Verify the collapsed and expanded states at 375px.
+- The bar's colours, typeface and weight come from the design brief; its structure (above) does not.
 
 ---
 
@@ -568,26 +568,29 @@ This is the **#1 cause of 404s** on GitHub Pages project sites. Project sites li
 
 ## CSS / Styling Approach
 
-> **If the owner pasted a link to a website whose design they like, fetch that page first and use its design as the visual model for the whole site** — match its layout, typography, spacing, structure, and overall colour feel, adapting it to the owner's content. A pasted reference site takes precedence over the default aesthetic guidance below.
+> **If the owner pasted a link to a website whose design they like, fetch that page first and use its design as the visual model for the whole site** — match its layout, typography, spacing, structure, and overall colour feel, adapting it to the owner's content. A pasted reference site takes precedence over the design quest and the guidance below.
+
+### Design quest — run it before writing any CSS
+
+Every site built from these instructions should look like its owner's, not like the last one built. Left alone, an AI assistant gives everyone the same cream page with a round photo on the left, so the look is **drawn at random, then refined**, following the method in <https://garyking.org/quest>. Before you write `custom.css` (and after you have the owner's content), download <https://gking.harvard.edu/mysite/files/QUEST_DESIGN.md> with `curl` (a page-fetch tool may summarise it and lose its word list) and follow it: run its small script three times for three random design briefs, write three concepts from them, check them against the sites already listed in the mysite directory, build the first one that is not too close to an existing site, and record the seed in `hugo.yaml` under `params.mysite.design`. The sections below give the token names, the components, and the rules that never change; the **values** (colours, typeface, hero arrangement, photo shape, heading style, how the accent is used) come from the brief. Because Hugo Blox keeps a top navigation bar, read a "left sidebar" page structure in the draw as "two columns: content plus a narrow aside". Skip the quest when the owner pasted a reference site, and when migrating an existing site (14.7: keep the legacy site's structure and accent) unless the owner asked for a new look.
 
 ### Colour Philosophy
 
-The site must feel **warm, grounded, and aesthetically cohesive** — never clinical or antiseptic. Follow these principles:
+The site must feel **aesthetically cohesive** — every colour belonging with every other, as on one page of a well-designed book. Warm or cool, paper or stone, light-with-a-dark-band or plain white is the brief's call. These rules hold for every brief:
 
-- **Earth tones as the foundation.** Build the palette from warm neutrals: stone (`#f5f0eb`), sand (`#e8e0d5`), warm gray (`#6b6560`), charcoal (`#2d2926`). Accent with muted sage (`#7a8c6e`), clay (`#b5704d`), or slate blue (`#5c7a8a`) depending on the institution's character.
-- **No bright, saturated, or "web default" colours.** Reject pure blue `#0000ff`, neon greens, electric purples, or any colour that feels like a hospital, a government form, or a 2003 website. Every colour should look good next to a leather-bound book.
-- **Colour coordination across the whole site.** The accent colour, link colour, heading colour, button colour, and footer colour must all belong to the same tonal family. If the institution's brand colour is bright, desaturate it or use it sparingly as a highlight, not as a dominant surface.
+- **One family.** The accent colour, link colour, heading colour, button colour, and footer colour must all belong to the same tonal family. If the institution's brand colour is bright, desaturate it or use it sparingly as a highlight, not as a dominant surface.
+- **No "web default" colours.** Reject pure blue `#0000ff`, neon greens, electric purples, bootstrap grey, or any colour that feels like a government form or a 2003 website.
 - **Institution colour as accent, not takeover.** Use the institution's official colour (e.g. Harvard crimson, Stanford cardinal) for subtle accents: link hover states, thin rules, active tab underlines. Never flood the page with it. The institution colour should feel like a monogram, not a paint job.
-- **Links readable but not garish.** Prefer a desaturated, darkened link colour that coordinates with the palette (e.g. `#5a7a6b` sage-teal or `#7a5c3a` warm umber) over generic "web link blue." Links must still be visually distinct from body text.
-- **Surfaces are warm, not white.** Body background should be a very subtle warm off-white (`#fdfbf8` or `#f9f7f4`), not pure `#ffffff`. Sidebar and card backgrounds use a slightly warmer tint.
+- **Links readable but not garish.** A link colour that coordinates with the palette, visibly distinct from body text, with WCAG AA contrast on the background.
+- **Surfaces are deliberate.** The background is whatever the brief drew — warm off-white, cool grey-white, plain white, or a pale wash — and cards and sidebars sit one step away from it in the same family. Do not reach for cream because it is familiar.
 
 ### custom.css requirements
 
 The single `assets/css/custom.css` file must implement:
 
-1. **Colour palette tokens** — CSS custom properties defining the full coordinated palette: `--color-bg`, `--color-surface`, `--color-text`, `--color-text-muted`, `--color-accent`, `--color-link`, `--color-link-hover`, `--color-border`. All must belong to the same tonal family (earth tones). Include the institution's brand colour as `--color-institution` used sparingly.
+1. **Colour palette tokens** — CSS custom properties defining the full coordinated palette: `--color-bg`, `--color-surface`, `--color-text`, `--color-text-muted`, `--color-accent`, `--color-link`, `--color-link-hover`, `--color-border`, with the values from the design brief. All must belong to the same tonal family. Include the institution's brand colour as `--color-institution` used sparingly.
 
-2. **Link color** — A desaturated, coordinated link colour from the earth-tone palette (not generic blue). Must have sufficient contrast (WCAG AA) against the warm background. Hover state shifts toward the institution accent.
+2. **Link color** — A coordinated link colour from the brief's palette (not generic blue). Must have sufficient contrast (WCAG AA) against the background. Hover state shifts toward the institution accent.
 
 3. **Forced light mode** — Override `.dark` and `html.dark` backgrounds/text back to light surfaces. Hide the theme toggle (`.theme-toggle`, `button[accesskey="t"]`). The site should always appear light.
 
@@ -599,19 +602,19 @@ The single `assets/css/custom.css` file must implement:
 
 7. **Responsive breakpoints** — Float-to-stack for publication images below 640px. Column stacking for sidebar filters on narrow screens. `1200px` max content width.
 
-8. **Accessibility** — Skip-to-content link, `:focus-visible` outlines (use a warm gold like `#d4a96a`, not neon yellow), `.sr-only` utility class, keyboard-friendly dropdowns with `focus-within`.
+8. **Accessibility** — Skip-to-content link, `:focus-visible` outlines in a palette colour with at least 3:1 contrast (not neon yellow), `.sr-only` utility class, keyboard-friendly dropdowns with `focus-within`.
 
 9. **Prose spacing** — `.prose p { margin-bottom: 1.25em }` for readable long-form content.
 
-10. **Sticky tab strip** — Warm off-white background (matching `--color-bg`), subtle bottom shadow, `z-index: 20`.
+10. **Sticky tab strip** — Background matching `--color-bg`, subtle bottom shadow, `z-index: 20`.
 
-11. **Sidebar filters** — Subtle border, rounded corners, warm light background (`--color-surface`), sticky positioning below tabs.
+11. **Sidebar filters** — Subtle border, corner radius from the brief, `--color-surface` background, sticky positioning below tabs.
 
-12. **Button styles** — Primary buttons use the accent colour (filled, rounded), secondary buttons (underlined text links), cite buttons (warm gray chip).
+12. **Button styles** — One treatment for primary actions and one for inline links, as the brief's "how the accent colour is used" says (filled accent buttons, outlined buttons, or bracketed text labels); cite buttons as a muted chip.
 
 13. **See Also section** — `.gk-see-also` with kind labels `[Paper]`, `[Dataset]`, etc. in a distinct style.
 
-14. **Footer** — Dark warm charcoal (`#2d2926`), light warm text (`#e8e0d5`), site navigation links. Include, in small print at the bottom right, a credit line: `Created using <a href="https://garyking.org/mysite">GaryKing.org/mysite</a>` (only the `GaryKing.org/mysite` text is the link; "Created using" is plain). This credit appears **exactly once**, in the persistent site footer that shows on every page — **do not also print it at the end of the homepage/research-areas content or any other page body.** Two "Created using…" lines on one screen is a bug. The credit is **on by default but opt-out**: gate it behind `params.mysite.credit` (defaulting to shown) so the owner can remove it now — via the "Footer credit" checkbox in their information form — or later by asking the agent. When the form's "Footer credit" box is unchecked, set `params.mysite.credit: false`.
+14. **Footer** — Colours from the brief (a dark band in `--color-text` with light text, or the page background with a top hairline), site navigation links. Include, in small print at the bottom right, a credit line: `Created using <a href="https://garyking.org/mysite">GaryKing.org/mysite</a>` (only the `GaryKing.org/mysite` text is the link; "Created using" is plain). This credit appears **exactly once**, in the persistent site footer that shows on every page — **do not also print it at the end of the homepage/research-areas content or any other page body.** Two "Created using…" lines on one screen is a bug. The credit is **on by default but opt-out**: gate it behind `params.mysite.credit` (defaulting to shown) so the owner can remove it now — via the "Footer credit" checkbox in their information form — or later by asking the agent. When the form's "Footer credit" box is unchecked, set `params.mysite.credit: false`.
 
     **Also add invisible metadata** in the `<head>`. This is **not** how the public directory is built — that comes only from the owner's explicit opt-in on the information form. The metadata simply lets sites built with this tool be found and supported, and provides standard structured data that helps search engines. It renders nothing visible and collects nothing. Emit two things, both gated behind `params.mysite.discovery` (on by default):
 
@@ -748,11 +751,11 @@ Humans forget; scripts don't. Any recurring manual step is a bug.
 
 ### 14.13 Visual Language
 
-- **Typography:** native system font stack via Blox (`font: native`). Fast, respects OS settings.
-- **Palette:** warm charcoal (`#2d2926`) text on warm off-white (`#fdfbf8`) backgrounds. Desaturated, coordinated link colour (sage, umber, or slate — never generic web blue). Muted warm gray (`#6b6560`/`#8a8580`) for metadata. Institution accent colour used sparingly for highlights, active states, and thin rules. Soft earth-tone banners for special content types (e.g. muted sage for datasets, warm clay for software).
+- **Typography:** the typeface family from the design brief. The default is the native system font stack via Blox (`font: native`); when the brief draws a serif, slab, or monospace element, self-host the font files in `static/fonts/` (two weights at most) — never load fonts from another company's server. Name the stack in `custom.css`.
+- **Palette:** the brief's palette, in the `--color-*` tokens. Text and background with WCAG AA contrast; a coordinated link colour (never generic web blue); muted text for metadata; the institution accent colour used sparingly for highlights, active states, and thin rules. Special content types (datasets, software) get a soft banner in a step of the same palette.
 - **Palette discipline:** Colors mean things. The link colour = clickable. The accent colour = institutional branding. Don't reuse colours for unrelated purposes. Every colour in the palette must look cohesive with every other — if you can't imagine them all on one page of a well-designed book, something is wrong.
-- **No bright, antiseptic, or clinical colours.** Pure white backgrounds, neon highlights, saturated primary colours, and generic "bootstrap blue" are all banned. The site should feel like a warm study, not a hospital corridor.
-- **Shape:** rounded corners 4–8px; subtle shadows only on interactive cards; 1px hairlines in a warm border tone (`#e2ddd5`) for dividers.
+- **No antiseptic or clinical colours.** Neon highlights, saturated primary colours, and generic "bootstrap blue" are banned. A plain white background is allowed only when the brief draws it, and then the type must carry the page (strong black, clear hierarchy) so it reads as a typeset document, not an empty form.
+- **Shape:** corner radius, shadow and hairline weight from the brief (hard corners and rules for a typeset feel; 4–8px radius and soft shadows for a card feel); 1px hairlines in `--color-border` for dividers.
 - **No ornamental animation.** Animated GIFs only as content (e.g. method demos), never decoration.
 - **Always light mode.** Force light even when `dark` class applied; hide theme toggle.
 - **Favicon: person's initials on a colored square.** Do NOT use the default Hugo Blox favicon. Generate a custom favicon (at minimum `favicon.ico` + `favicon-32x32.png` + `apple-touch-icon.png`) showing the person's initials (first letter of first name + first letter of last name, e.g. "GK" for Gary King) in bold white text, centered on a filled square using the site's accent/institution colour (`--color-accent` or `--color-institution`). Place the generated files in `static/`. The result should look like a clean monogram — the same colour that appears in the site's active tab underlines, buttons, and link hovers. This replaces the generic Blox "HB" icon that otherwise appears in the browser tab.
@@ -995,7 +998,7 @@ Rules:
 
 Produce ALL of the following:
 
-1. **`hugo.yaml`** — complete config with all settings, menus, taxonomies, permalinks
+1. **`hugo.yaml`** — complete config with all settings, menus, taxonomies, permalinks, including `params.mysite.design` (the quest's seed, priming phrase and concept)
 2. **`go.mod` and `go.sum`** — importing Hugo Blox
 3. **`package.json`** — with Pagefind dependency
 4. **`assets/css/custom.css`** — complete project stylesheet: institution colors, forced light mode, dense citation styles, card hovers, responsive breakpoints, accessibility focus states, `prefers-reduced-motion`, See Also styling, button styles, footer
@@ -1036,6 +1039,8 @@ For a new faculty/lab site, follow this order:
 > **Prerequisite — install Hugo first.** Building and previewing the site locally requires **Hugo (extended)** on the machine. Run `hugo version` to check; if it isn't installed, install it before continuing — `brew install hugo` (macOS), `winget install Hugo.Hugo.Extended` (Windows), or see <https://gohugo.io/installation/> (Linux/other). Without Hugo you can't build the local preview.
 
 > **Step 0 — record this build first.** Before creating anything, complete the *Record This Build With the mysite Team* step above (a single form POST). Do it first so usage is captured even if the build is interrupted.
+
+> **Before `custom.css` — run the design quest.** Download <https://gking.harvard.edu/mysite/files/QUEST_DESIGN.md> with `curl` and follow it (three random briefs, three concepts, a check against the directory, build one). Skip it if the owner pasted a reference site, or when migrating an existing site unless the owner asked for a new look.
 
 1. `mkdir prof-site && cd prof-site && git init && gh repo create`
 2. `hugo new site hugo-site` (keep the `hugo-site/` subfolder)
