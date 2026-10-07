@@ -109,12 +109,21 @@ AXES = {
         "monospace labels and metadata, sans body",
     ],
     "hero (the first screen)": [
-        "photo on the left, text on the right",
-        "text on the left, photo on the right",
-        "full-width banner with the photo set into it",
-        "text-first hero with a small photo in the sidebar or header",
-        "large square photo above a two-column introduction",
-        "name as a very large wordmark, with a small photo beside the title",
+        "1 photo on the left, text on the right",
+        "2 text on the left, photo on the right",
+        "3 centered: photo above, name and intro centered below",
+        "4 narrow left column with photo, name, title and links; intro to the right",
+        "5 full-width banner (a colour band or a photo of the owner's workplace) with the name on it, intro below",
+        "6 text-first: name, one line, straight into the work; small photo in the header or none above the fold",
+        "7 name as a very large wordmark across the top, small photo beside the title",
+        "8 featured figure: one figure from the owner's best-known paper, large, beside the name (still)",
+        "9 publication timeline: a line under the name with a mark per paper by year, each a link (still)",
+        "10 map of the work: a small map of the places the owner's research is about, dots that pulse once on load (moving once)",
+        "11 coauthor constellation: the owner's coauthors as a small network drifting very slowly beside the intro (moving)",
+        "12 a chart that draws itself: one key result from the owner's work, redrawn as a plain chart that draws on once (moving once)",
+        "13 topic field: the owner's research areas and recurring title words as a typographic band behind or beside the name, sized by frequency (still)",
+        "14 slow slideshow: three to five figures from the owner's papers crossfading beside the intro, each captioned (moving)",
+        "15 work grid: tiles of figures or covers from the owner's papers with their titles, under the name and one line (still)",
     ],
     "photo treatment": [
         "circle",
@@ -169,10 +178,12 @@ for axis, options in AXES.items():
 Run it **three times** (three different seeds) so you have three draws. Keep the printed text.
 
 **When two lines of a draw do not fit together**, the page structure wins and the hero adapts:
-with a left sidebar, the sidebar holds the photo and the navigation, and the hero is the text
-block; with full-bleed bands, the hero is the first band. If the build instructions fix a
-structure — the academic build keeps a top navigation bar — read "left sidebar" as "two
-columns: content plus a narrow aside".
+with a left sidebar, the sidebar holds the photo and the navigation, the hero is the text block,
+and first screen 4 (itself a narrow column) merges into that sidebar; with full-bleed bands, the
+hero is the first band; a "deep ink header" temperature and the banner of first screen 5 are one
+band, not two; the work grid of first screen 15 in a narrow column is two tiles across. If the
+build instructions fix a structure — the academic build keeps a top navigation bar — read "left
+sidebar" as "two columns: content plus a narrow aside".
 
 ## Step 2 — Turn each draw into a concept (the priming phrase goes first)
 
@@ -191,7 +202,8 @@ shapes and details away from the usual. Each concept must contain:
   `Rockwell, "Roboto Slab", Georgia, serif`; for a grotesque, `"Helvetica Neue", Helvetica, Arial,
   sans-serif`; for monospace labels, `"SF Mono", Menlo, Consolas, monospace`;
 - the hero arrangement, photo treatment, heading style, page structure and accent use, each as
-  drawn;
+  drawn; for a first screen with a graphic (arrangements 8–15), what it is made from (which
+  paper, figure, places, coauthors or words) and what the still version looks like;
 - the signature detail, placed somewhere specific;
 - the institution's colour, used as a small accent, not as the main colour.
 
@@ -199,9 +211,64 @@ Take the draw seriously. If an option seems odd for this owner (a dark band for 
 that is all pastel), adapt it rather than quietly reverting to the usual cream-and-circle look.
 Reverting is exactly the failure the quest is for.
 
-## Step 3 — Check the three concepts against the directory
+### The first screen: fifteen arrangements
 
-The point is that owners do not all end up with the same site, so check before you build:
+The "hero" line of the draw picks one of fifteen first screens. The first seven are the ways
+academic sites arrange a photo and text; the other eight put a still or moving graphic **made
+from the owner's own work** on the first screen. They were collected in October 2026 from real
+academic sites and the common site templates (Quarto's about pages, Hugo Blox, al-folio,
+academicpages, and the personal sites of economists, political scientists, statisticians and
+data-visualisation researchers).
+
+| # | Arrangement | Seen on | Made from | If the owner's materials cannot support it |
+|---|---|---|---|---|
+| 1 | Photo left, text right | Hugo Blox landing pages; Quarto *broadside* | the photo | — |
+| 2 | Text left, photo right | al-folio; Quarto *solana* | the photo | — |
+| 3 | Centered: photo above, name and intro centered below | Quarto *jolla*; Hugo Academic | the photo | — |
+| 4 | Narrow left column (photo, name, title, links), intro to the right | Quarto *trestles*; academicpages; many political-science sites | the photo | — |
+| 5 | Full-width banner with the name on it, intro below | Quarto *marquee*; sites with a dark header band | a colour band, or a photo of the owner's building, lab or city | — |
+| 6 | Text-first: name, one line, straight into the work; small photo in the header or none above the fold | sociologists' and computer scientists' minimal sites | the papers list | — |
+| 7 | Name as a very large wordmark across the top, small photo beside the title | economists' and sociologists' sites with a type-led header | the name | — |
+| 8 | **Featured figure**: one figure from the owner's best-known paper, large, beside the name (still) | sites that lead with a book cover or a key figure | the figure as an image from the author's own version of the paper (or an image file the owner supplies), or the owner's book cover, or the paper's title page set as a card; captioned with the paper's title | use 1 |
+| 9 | **Publication timeline**: a line under the name with a mark per paper by year, each a link (still) | timeline-style home pages | the papers list (years, titles); with more than twelve papers, one mark per year sized by count, not one per paper | fewer than three papers: use 6 |
+| 10 | **Map of the work**: a small map of the places the owner's research is about, dots that pulse once on load (moving once) | field researchers' sites | places named in the papers (countries, regions, cities) on an accurate outline rendered once to SVG from public-domain Natural Earth data (with Node: the `world-atlas` or `us-atlas` package plus `d3-geo`, run once at build time, the packages then removed), under 100 KB; never an outline drawn by hand | no places in the work, or no way to render an accurate outline: use 5 |
+| 11 | **Coauthor constellation**: the coauthors as a small network drifting very slowly beside the intro (moving) | data-visualisation researchers' sites with a particle or network header | the author lists of the papers; names as faint labels | fewer than four coauthors: use 3 |
+| 12 | **A chart that draws itself**: one key result from the owner's work, redrawn as a plain chart that draws on once (moving once) | sites of researchers who lead with a result | numbers copied exactly from a table or the text of the owner's own paper, drawn in the site's palette and confirmed by the owner in the preview; never numbers estimated from a picture of a chart, never someone else's data | no such numbers: use 2 |
+| 13 | **Topic field**: the research areas and recurring title words as a typographic band behind or beside the name, sized by frequency (still) | type-led sites | the research interests and the words of the paper titles, set in one typeface, three sizes at most, one muted colour — a typeset list, not a rainbow tag cloud | fewer than five distinct words: use 7 |
+| 14 | **Slow slideshow**: three to five figures from the owner's papers crossfading beside the intro, each captioned (moving) | lab sites with a research-image carousel | the author's own figures, covers or title cards, fitted inside one fixed frame so nothing jumps between slides | fewer than three images: use 4 |
+| 15 | **Work grid**: tiles of figures or covers from the papers with their titles, under the name and one line (still) | generative artists' and visualisation researchers' sites that open with a grid of work | the author's own figures or covers | fewer than four images: use 6 |
+
+### Graphics made from the owner's work (arrangements 8–15)
+
+- **Only the owner's own materials.** Figures from their papers in the author's version (a
+  figure that exists only in the journal's typeset version is the publisher's layout: pick
+  another figure, the book cover, or a title card), data they report, the places, coauthors,
+  years and words of their own paper list. No stock images, no one else's figure, no decoration
+  that pretends to be data.
+- **Take figures out as images; do not redraw them by eye.** Use `pdftoppm` or `pdfimages`
+  (poppler) when installed, otherwise ask the owner for the figure file. A redrawn chart is
+  allowed only when every number in it is copied from a table or the text of the paper, and the
+  owner confirms it in the preview. Never draw a map outline or a chart by estimation.
+- **Keep images light.** Each image at most 1200 pixels wide and under 60 KB (JPEG or WebP),
+  so the whole first screen stays within the site's page-weight rule.
+- **Still by default.** Build the still version first. Motion is one gentle thing: a draw-on of
+  at most two seconds that happens once, a drift of a few pixels a second, a crossfade every
+  eight to ten seconds. Nothing loops fast, blinks, or plays video. When the visitor's system
+  asks for reduced motion (`prefers-reduced-motion: reduce`), show the still version only.
+- **Small and self-contained.** Inline SVG, CSS, and at most a few dozen lines of plain
+  JavaScript; no libraries; no files from other servers; under 150 KB for the whole graphic.
+  Give it `alt` text or an `aria-label` that says what it shows. The name and intro are still
+  the first thing read, and on a phone the graphic shrinks or moves below the text.
+- **Say what it was made from.** In the preview, tell the owner which paper, figure, places or
+  coauthors the graphic comes from, and that it can be swapped or removed.
+- **Fall back honestly.** If the owner's materials cannot support the arrangement drawn, use the
+  fallback in the table and say so; do not invent a figure to fill the space.
+
+## Step 3 — Check the three concepts, and replace any that fail, before the owner sees them
+
+The point is that owners do not all end up with the same site, and that the three choices are
+real choices. Check before building anything, and fix a failure by redrawing, so the owner
+never sees a concept that failed:
 
 1. Collect the addresses listed under "Featured sites" on <https://gking.harvard.edu/mysite/>:
 
@@ -214,34 +281,54 @@ The point is that owners do not all end up with the same site, so check before y
    and `border-radius` in the CSS, and for the order of the photo and the text in the first
    section). Note four things per site: background colour (warm, cool, white, dark), typeface
    family (serif or sans), hero arrangement, photo treatment.
-3. A concept that matches an existing site on **three or more** of those four things is too
-   close. Drop it and use the next concept; if all three are too close, draw again.
+3. **Too close to a listed site:** a concept that matches an existing site on **all four** of
+   those things. **Too close to each other:** two of the three concepts that match each other
+   on three or more of the four (the owner's three choices must look different). In either
+   case, replace the failing concept: run the script again for a new seed, write a new concept
+   from it as in Step 2, and check it the same way. Repeat until three concepts pass. If a
+   replacement has failed six times in a row, keep the best of the attempts and tell the owner
+   why.
 
 As of October 2026 the listed sites cluster on warm paper, a circular photo, and photo-left:
 a concept with all three of those is too close whatever the fetch says. If the fetch fails (no
-network, page changed), say so and carry on with the first concept that clears that floor.
+network, page changed), say so, apply that floor, and carry on.
 
-## Step 4 — Build one, show three
+## Step 4 — Build three previews, let the owner choose, then build the site
 
-Build the first concept that passed the check. In the first local preview, tell the owner, in
-plain words, which concept was built and the other two in two sentences each, and that any of
-them can be switched to, mixed, or changed. The owner may also say "run the quest again".
+Before building the full site, make a preview of the home page in each of the three concepts,
+with the owner's real content: their name, title, photo, intro text and a few of their papers.
+Keep the previews small and self-contained:
 
-Record what was chosen so it can be reproduced and so a later rebuild does not silently change
-the look. In `hugo.yaml`:
+- a folder `_quest/` in the repository root holding `preview-1.html`, `preview-2.html` and
+  `preview-3.html`, each a complete page with its CSS inline and the owner's photo (and any
+  figure images) copied alongside, plus an `index.html` that is a plain list of three links,
+  each with its priming phrase and a one-line description;
+- each preview shows what the real site will show first: the header with the owner's name,
+  the hero, the About text, a few papers, the footer;
+- the folder is not part of the site: add `_quest/` to `.gitignore`, and delete it once the
+  choice is made.
+
+Then show them. Tell the owner to open `_quest/index.html` in their browser (or serve the folder
+with `python3 -m http.server 8788 --directory _quest` and give them the link), and ask which of
+the three to build. The owner may instead ask for a mix of two, a change to one, or a fresh set
+of three (new seeds, same checks).
+
+Build the full site in the chosen concept, and record the choice so it can be reproduced and so
+a later rebuild does not silently change the look. In `hugo.yaml`:
 
 ```yaml
 params:
   mysite:
     design:
-      seed: 20261006          # the number the script printed
+      seed: 20261006          # the chosen draw's seed, as the script printed it
       priming: "HARBOR and LEDGER"
       concept: "warm paper; serif headings, sans body; text-first hero; arched photo; numbered sections; one narrow column; hairline accents; sidenotes"
+      alternatives: [20261007, 20261011]   # the seeds of the two previews not chosen
 ```
 
 and add one line to `UPDATING.md`: "To change the look of the site, ask your assistant to run
 the design quest at https://gking.harvard.edu/mysite/files/QUEST_DESIGN.md and show you three
-options."
+previews."
 
 Optionally, save this file as `.claude/skills/quest/SKILL.md` in the repository so the owner
 can type `/quest` later to redraw.
@@ -259,6 +346,8 @@ These are not taste. They stay no matter what the dice say:
 - The footer credit and the invisible marker, exactly as the information form's boxes say.
 - Everything the site needs lives in the repository: no fonts, scripts or images loaded from
   other servers.
+- A moving graphic is gentle, happens once or slowly, stops under `prefers-reduced-motion`,
+  and is made from the owner's own work; never video, never a library, never decoration.
 - Tone and content rules in the build instructions (understated, no filler, owner's own words).
 
 ## Using /quest for anything else
