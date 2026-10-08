@@ -6,7 +6,7 @@ aliases:
   - /publication/if-a-statistical-model-predicts-that-common-events-should-occur-only-once-in-10000-elections-maybe-its-the-wrong-model/
 date: '2026-10-07'
 image:
-  alt_text: "Figure 1: count of US House elections per year, 1948 to 2020, whose observed vote fell outside a 99.99 percent predictive interval, for the normal model (up to nine a year, odds as long as 1 in 4.77 quintillion) and for LogisTiCC (two in total)"
+  alt_text: "Figure 1: count of US House elections per year, 1948 to 2024, whose observed vote fell outside a 99.99 percent predictive interval, for the normal model (up to nine a year, odds as long as 1 in 4.77 quintillion) and for LogisTiCC (two in total)"
 authors:
   - "Danny Ebanks"
   - "Jonathan N. Katz"
