@@ -2,7 +2,7 @@
 title: "Replication Certification at Publication: Checkable by Anyone, Anywhere, in Seconds, Forever"
 slug: "replication-certification-at-publication"
 url: /certify/
-date: '2026-10-05'
+date: '2026-10-08'
 authors:
   - Gary King
   - Yiqing Xu
@@ -18,7 +18,7 @@ links:
     label: Appendix
     url: files/replication-certification-supp.pdf
 image:
-  alt_text: "Certification at a glance, in four cards: how it works (the author readies a dataset, the archive certifies one run, anyone checks it), why the record is proof, what each party pays today and gains once certified, and what certification does not cover"
+  alt_text: "Certification at a glance, in four cards: how certification works (the author readies a dataset, the archive certifies one run, anyone checks it), why it needs no one's word, how everyone benefits (what each party pays today and gains once certified), and what certification does not cover"
 
 # Blind link: reachable only by people who have the URL. `blind: true` emits
 # a noindex/nofollow robots meta (gk-blind-robots head hook) and removes the
