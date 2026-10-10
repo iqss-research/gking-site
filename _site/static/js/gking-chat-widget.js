@@ -27,7 +27,7 @@
 (function () {
   "use strict";
 
-  var WIDGET_VERSION = "1.13.0";
+  var WIDGET_VERSION = "1.14.0";
 
   var PIXEL_URL = "https://ueczzuogsj2hnfdr7gwfwuh5sa0oozkm.lambda-url.us-east-2.on.aws/";
 
@@ -1358,9 +1358,10 @@
 
     /* Which conversation THIS TAB is looking at. Per-tab by construction, so
        two open tabs never fight over it — the durable archive in
-       gk-history.js is what they share. Kept in sessionStorage for the same
-       reason as before: a reload continues the conversation the visitor asked
-       for rather than silently forking a new one, and it dies with the tab.
+       gk-history.js is what they share. Every page load clears it (below), so
+       opening the widget on a new page, or after a reload, always starts a
+       new conversation; earlier ones are in the history list. Closing and
+       reopening the panel on the same page keeps the one in progress.
        gk-history.js reads and writes this exact key, so the two paths below
        are interchangeable and nothing is orphaned if the module loads late. */
     var CONV_KEY = "gk_conv_widget";
@@ -1395,6 +1396,12 @@
       }
       if (id && trackerReady) T.setConversationId(id);
     }
+
+    /* Start every page on a new conversation. Not showing the old transcript
+       is not enough; the pointer itself has to go, or ensureConversationId()
+       picks the old id back up and the first new turn is saved over the
+       archived conversation. */
+    setActiveConversation(null);
 
     /* Record the conversation. Debounced inside gk-history.js, and a no-op
        until the module has loaded (or forever, if it never does). */
@@ -1920,15 +1927,6 @@
       HIST.onFork(function (oldId, newId) {
         if (conversationId === oldId) setActiveConversation(newId);
       });
-      /* Reopening after a reload should show the conversation the tab was in,
-         not an empty panel under the same id — which is what happened before
-         history existed. */
-      var active = HIST.activeId();
-      if (active && messages.length === 0) {
-        HIST.get(active).then(function (conv) {
-          if (conv && conv.messages.length && messages.length === 0) applyConversation(conv);
-        });
-      }
       if (histOpen) renderHistory();
     }
 

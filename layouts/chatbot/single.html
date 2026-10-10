@@ -808,11 +808,9 @@
     });
   }
 
-  /* Which conversation THIS TAB is looking at. It stays in sessionStorage for
-     the same reason as before — a reload continues the conversation the
-     visitor asked for instead of silently starting a new one, which used to
-     inflate the session count and deflate session depth — and it still dies
-     with the tab. What is new is the durable archive behind it
+  /* Which conversation THIS TAB is looking at, in sessionStorage. Every page
+     load clears it (below), so a visit — a reload included — always opens on
+     a new conversation; earlier ones are one click away in the history list
      (js/gk-history.js), which both this page and the popup widget share, so a
      chat started in one can be finished in the other. gk-history.js reads and
      writes this exact key, so the two paths below are interchangeable. */
@@ -851,6 +849,12 @@
     }
     if (id) T.setConversationId(id);
   }
+
+  /* Start every visit on a new conversation. Not showing the old transcript
+     is not enough; the pointer itself has to go, or ensureConversationId()
+     picks the old id back up and the first new turn is saved over the
+     archived conversation. */
+  setActiveConversation(null);
 
   /* Record the conversation. Debounced inside gk-history.js. */
   function persist() {
@@ -2193,19 +2197,6 @@
 
     setSidebarOpen(HIST.ui().sidebar !== "collapsed");
     renderHistory();
-
-    /* Reloading should return you to the conversation you were in, rather
-       than to an empty page under the same id — which is what happened before
-       history existed. */
-    var activeConv = HIST.activeId();
-    if (activeConv) {
-      HIST.get(activeConv).then(function(conv) {
-        if (conv && conv.messages.length && messages.length === 0) {
-          applyConversation(conv);
-          renderHistory();
-        }
-      });
-    }
   } else if (shellEl) {
     // No store: no history affordances at all, rather than a permanently
     // empty list.

@@ -37,7 +37,9 @@
  * That pointer lives in sessionStorage under each surface's existing key
  * (gk_conv / gk_conv_widget) and keeps its old meaning: which conversation
  * THIS TAB is looking at. Per-tab by construction, so two open tabs never
- * fight over it — while the archive below is shared across them.
+ * fight over it — while the archive below is shared across them. Both
+ * surfaces clear it on every page load, so a visit always opens on a new
+ * conversation; nothing here restores one unasked.
  *
  * ES5 syntax (both surfaces ship with no build step) plus native Promise,
  * which the widget's async send() already requires.
