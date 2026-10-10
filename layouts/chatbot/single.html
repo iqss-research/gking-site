@@ -1317,6 +1317,7 @@
       sendBtn.setAttribute("aria-label", "Send");
       sendBtn.classList.remove("stop");
     }
+    syncLongInputNote();
   }
 
   function handleSendClick() {
@@ -1366,7 +1367,6 @@
         messages[streamMsgIdx].content = streamTarget.slice(0, streamRevealed);
         renderMessages();
       }
-    syncLongInputNote();
       requestAnimationFrame(tick);
     }
     requestAnimationFrame(tick);
@@ -1395,6 +1395,17 @@
   var chipsEl = document.getElementById("gk-chips");
   var errEl = document.getElementById("gk-upload-err");
   var errTextEl = document.getElementById("gk-upload-err-text");
+  // Long-input cap (server-side, 7,000 chars per message). The same note
+  // shows while an over-cap draft sits in the box, and again when the server
+  // reports it cut the message (a `notice` event). Reuses the amber note slot.
+  var LONG_INPUT_CHARS = 7000;
+  var LONG_INPUT_NOTICE = "Max word limit exceeded. Could you rephrase your question more concisely?";
+  var longInputNoteShown = false;
+  function syncLongInputNote() {
+    var long = textarea.value.length > LONG_INPUT_CHARS;
+    if (long && !longInputNoteShown) { showUploadNote(LONG_INPUT_NOTICE); longInputNoteShown = true; }
+    else if (!long && longInputNoteShown) { clearUploadError(); longInputNoteShown = false; }
+  }
   var pending = [];
 
   // Mirrors the server limits in src/lib/uploads/storage.ts (gking-avatar-v3).
@@ -1444,17 +1455,6 @@
     if (file.size > MAX_BYTES[kind]) {
       return "“" + file.name + "” is " + fmtBytes(file.size) +
         " — the limit is " + fmtBytes(MAX_BYTES[kind]) + " for this file type.";
-  // Long-input cap (server-side, 7,000 chars per message). The same note
-  // shows while an over-cap draft sits in the box, and again when the server
-  // reports it cut the message (a `notice` event). Reuses the amber note slot.
-  var LONG_INPUT_CHARS = 7000;
-  var LONG_INPUT_NOTICE = "Max word limit exceeded. Could you rephrase your question more concisely?";
-  var longInputNoteShown = false;
-  function syncLongInputNote() {
-    var long = textarea.value.length > LONG_INPUT_CHARS;
-    if (long && !longInputNoteShown) { showUploadNote(LONG_INPUT_NOTICE); longInputNoteShown = true; }
-    else if (!long && longInputNoteShown) { clearUploadError(); longInputNoteShown = false; }
-  }
     }
     return null;
   }
@@ -1741,6 +1741,8 @@
               else if (evt.type === "step_done") { if (messages[idx].steps) messages[idx].steps.completeStep(evt.id); }
               else if (evt.type === "done") { if (messages[idx].steps) messages[idx].steps.finish(evt.worked_ms, evt.step_count); }
               else if (evt.type === "meta") messages[idx].meta = evt;
+              // Server cut the latest message to the long-input cap.
+              else if (evt.type === "notice" && evt.content) { showUploadNote(evt.content); longInputNoteShown = false; }
               // NOTE: unknown event types fall through silently, on purpose.
               // This page is served statically and a cached bundle can lag a
               // backend deploy, so tolerating unfamiliar events is
@@ -1791,8 +1793,6 @@
         T.track("error", {
           where: "send",
           name: (e && e.name) || "Error",
-              // Server cut the latest message to the long-input cap.
-              else if (evt.type === "notice" && evt.content) { showUploadNote(evt.content); longInputNoteShown = false; }
           message: String((e && e.message) || e).slice(0, 200),
           waited_ms: turnStartedAt ? Date.now() - turnStartedAt : null
         }, { immediate: true });

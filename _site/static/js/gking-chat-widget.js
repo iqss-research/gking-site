@@ -1294,7 +1294,7 @@
     var chipsEl = shadow.querySelector(".chips");
     var errEl = shadow.querySelector(".upload-err");
     var errTextEl = shadow.querySelector(".upload-err-text");
-    // Long-input cap (server-side, 10,000 chars per message). The same note
+    // Long-input cap (server-side, 7,000 chars per message). The same note
     // shows while an over-cap draft sits in the box, and again when the server
     // reports it cut the message (a `notice` event, so old history or an agent
     // client is covered too). It reuses the amber upload-note slot.
@@ -2004,6 +2004,7 @@
         sendBtn.setAttribute("aria-label", "Send");
         sendBtn.classList.remove("stop");
       }
+      syncLongInputNote();
     }
 
     function handleSendClick() {
@@ -2056,7 +2057,6 @@
         requestAnimationFrame(tick);
       }
       requestAnimationFrame(tick);
-      syncLongInputNote();
     }
 
     function stopRevealLoop() {
@@ -2418,6 +2418,10 @@
                   if (messages[idx].steps) messages[idx].steps.finish(evt.worked_ms, evt.step_count);
                 } else if (evt.type === "meta") {
                   messages[idx].meta = evt;
+                } else if (evt.type === "notice" && evt.content) {
+                  // Server cut the latest message to the long-input cap.
+                  showUploadNote(evt.content);
+                  longInputNoteShown = false;
                 }
                 // NOTE: unknown event types fall through this chain silently,
                 // on purpose. gking-site is served statically and a cached
@@ -2471,10 +2475,6 @@
         }
         streaming = false;
         if (wasAbort) {
-                } else if (evt.type === "notice" && evt.content) {
-                  // Server cut the latest message to the long-input cap.
-                  showUploadNote(evt.content);
-                  longInputNoteShown = false;
           var last = messages[messages.length - 1];
           if (last && last.role === "assistant" && !last.content) {
             last.content = "_(stopped)_";
