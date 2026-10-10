@@ -1299,7 +1299,7 @@
     // reports it cut the message (a `notice` event, so old history or an agent
     // client is covered too). It reuses the amber upload-note slot.
     var LONG_INPUT_CHARS = 7000;
-    var LONG_INPUT_NOTICE = "Your message exceeds the word limit. Please rephrase your question using fewer words.";
+    var LONG_INPUT_NOTICE = "Max word limit exceeded. Could you rephrase your question more concisely?";
     var longInputNoteShown = false;
     function syncLongInputNote() {
       var long = textarea.value.length > LONG_INPUT_CHARS;
