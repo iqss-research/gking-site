@@ -1203,6 +1203,52 @@
     return out + '</ol>';
   }
 
+  /* Follow the answer down only while the reader is at the bottom. A stream
+     rebuilds the transcript every frame, and pinning scrollTop to the bottom
+     on each rebuild dragged anyone who scrolled up to reread straight back
+     down. Any move up lets go; scrolling back to the bottom, sending or
+     switching conversations takes hold again. */
+  // How close to the bottom counts as "at the bottom": a quarter of the
+  // visible transcript, never less than this. Mid-stream the bottom keeps
+  // moving while a scroll travels toward it, so a tight band is never hit.
+  var STICK_MIN_PX = 48;
+  var stickToBottom = true;
+  var lastScrollTop = 0;
+  function noteScroll() {
+    if (!messagesEl.clientHeight) return; // empty chat: transcript hidden
+    var top = messagesEl.scrollTop;
+    var gap = messagesEl.scrollHeight - top - messagesEl.clientHeight;
+    // Up and off the bottom lets go; a resize that clamps scrollTop to the
+    // bottom also moves it up, but leaves no gap. Only a move down takes
+    // hold, so the first sub-pixel frame of a scroll up never reads as
+    // "still at the bottom".
+    if (top < lastScrollTop - 0.5) {
+      if (gap >= 1) stickToBottom = false;
+    } else if (top > lastScrollTop + 0.5 &&
+               gap <= Math.max(STICK_MIN_PX, messagesEl.clientHeight / 4)) {
+      stickToBottom = true;
+    }
+    lastScrollTop = top;
+  }
+  function settleScroll(keepTop) {
+    if (!messagesEl.clientHeight) return;
+    if (stickToBottom) messagesEl.scrollTop = messagesEl.scrollHeight;
+    // Only write when it moved: assigning scrollTop halts touch momentum.
+    else if (messagesEl.scrollTop !== keepTop) messagesEl.scrollTop = keepTop;
+    lastScrollTop = messagesEl.scrollTop;
+  }
+  function followLatest() {
+    stickToBottom = true;
+    lastScrollTop = 0;
+  }
+  messagesEl.addEventListener("scroll", noteScroll, { passive: true });
+  // A wheel scroll is animated, and its first frame can move under a pixel;
+  // the next rebuild would snap it back before it ever showed. Let go on
+  // the intent instead.
+  messagesEl.addEventListener("wheel", function(e) {
+    if (e.deltaY < 0 && messagesEl.scrollTop > 0) stickToBottom = false;
+  }, { passive: true });
+
   function renderMessages() {
     messagesEl.querySelectorAll("[data-comment-textarea]").forEach(function(ta) {
       var id = ta.getAttribute("data-comment-textarea");
@@ -1211,6 +1257,9 @@
     var srTa = messagesEl.querySelector("[data-sr-textarea]");
     if (srTa) sessionRating.commentDraft = srTa.value;
 
+    // Catches a scroll the browser applied but has not yet reported.
+    noteScroll();
+    var keepTop = messagesEl.scrollTop;
     messagesEl.innerHTML = "";
     chatEl.classList.toggle("gk-empty", messages.length === 0);
 
@@ -1296,7 +1345,7 @@
       messagesEl.appendChild(renderSessionRatingCard());
     }
 
-    messagesEl.scrollTop = messagesEl.scrollHeight;
+    settleScroll(keepTop);
   }
 
   function isBusy() { return loading || streaming; }
@@ -1685,6 +1734,7 @@
     // Save the question before the answer exists: a tab closed mid-answer
     // should still leave the conversation in the archive.
     persist();
+    followLatest();
     setLoading(true);
 
     abortController = new AbortController();
@@ -1954,6 +2004,7 @@
        for a conversation that already answered (or dismissed) it. */
     sessionRating = { shown: !!conv.ratingDone, dismissed: !!conv.ratingDone, rated: null, commentOpen: false, commentDraft: "", commentSent: false };
     setActiveConversation(conv.id);
+    followLatest();
     renderMessages();
     /* Reuses the upload notice bar rather than adding a second one. Without
        this the model would appear to have forgotten a document the transcript
@@ -1991,6 +2042,7 @@
     // with empty threads.
     setActiveConversation(null);
     clearUploadError();
+    followLatest();
     renderMessages();
     renderHistory();
     textarea.focus();

@@ -1691,8 +1691,57 @@
       return out;
     }
 
+    /* Follow the answer down only while the reader is at the bottom. A stream
+       rebuilds the transcript every frame, and pinning scrollTop to the bottom
+       on each rebuild dragged anyone who scrolled up to reread straight back
+       down. Any move up lets go; scrolling back to the bottom, sending,
+       opening the panel or switching conversations takes hold again. */
+    // How close to the bottom counts as "at the bottom": a quarter of the
+    // visible transcript, never less than this. Mid-stream the bottom keeps
+    // moving while a scroll travels toward it, so a tight band is never hit.
+    var STICK_MIN_PX = 48;
+    var stickToBottom = true;
+    var lastScrollTop = 0;
+    function noteScroll() {
+      if (!messagesEl.clientHeight) return; // panel hidden: nothing to read
+      var top = messagesEl.scrollTop;
+      var gap = messagesEl.scrollHeight - top - messagesEl.clientHeight;
+      // Up and off the bottom lets go; a resize that clamps scrollTop to the
+      // bottom also moves it up, but leaves no gap. Only a move down takes
+      // hold, so the first sub-pixel frame of a scroll up never reads as
+      // "still at the bottom".
+      if (top < lastScrollTop - 0.5) {
+        if (gap >= 1) stickToBottom = false;
+      } else if (top > lastScrollTop + 0.5 &&
+                 gap <= Math.max(STICK_MIN_PX, messagesEl.clientHeight / 4)) {
+        stickToBottom = true;
+      }
+      lastScrollTop = top;
+    }
+    function settleScroll(keepTop) {
+      if (!messagesEl.clientHeight) return;
+      if (stickToBottom) messagesEl.scrollTop = messagesEl.scrollHeight;
+      // Only write when it moved: assigning scrollTop halts touch momentum.
+      else if (messagesEl.scrollTop !== keepTop) messagesEl.scrollTop = keepTop;
+      lastScrollTop = messagesEl.scrollTop;
+    }
+    function followLatest() {
+      stickToBottom = true;
+      lastScrollTop = 0;
+    }
+    messagesEl.addEventListener("scroll", noteScroll, { passive: true });
+    // A wheel scroll is animated, and its first frame can move under a pixel;
+    // the next rebuild would snap it back before it ever showed. Let go on
+    // the intent instead.
+    messagesEl.addEventListener("wheel", function (e) {
+      if (e.deltaY < 0 && messagesEl.scrollTop > 0) stickToBottom = false;
+    }, { passive: true });
+
     function renderMessages() {
       syncCommentDrafts();
+      // Catches a scroll the browser applied but has not yet reported.
+      noteScroll();
+      var keepTop = messagesEl.scrollTop;
       messagesEl.innerHTML = "";
       if (messages.length === 0) {
         var welcome = document.createElement("div");
@@ -1777,7 +1826,7 @@
       if (sessionRating.shown && !sessionRating.dismissed) {
         messagesEl.appendChild(renderSessionRatingCard());
       }
-      messagesEl.scrollTop = messagesEl.scrollHeight;
+      settleScroll(keepTop);
     }
 
     // The panel is full-screen at <=600px (same breakpoint as the CSS media query).
@@ -1810,7 +1859,7 @@
       iconRestore.style.display = fullscreen ? "" : "none";
       expandBtn.setAttribute("aria-label", fullscreen ? "Exit full screen" : "Full screen");
       lockPageScroll(open && (isMobileViewport() || fullscreen));
-      messagesEl.scrollTop = messagesEl.scrollHeight;
+      settleScroll(messagesEl.scrollTop);
     }
 
     function setOpen(next) {
@@ -1839,6 +1888,7 @@
         // Conflating the two is what made the widget's "45% conversion" and
         // the full page's "19%" look comparable when they never were.
         track("widget_open", { since_load_ms: Date.now() - loadedAt });
+        followLatest();
         renderMessages();
         // Don't autofocus on mobile: it pops the keyboard over the welcome
         // message the moment the panel opens.
@@ -1892,6 +1942,7 @@
          for a conversation that already answered (or dismissed) it. */
       sessionRating = { shown: !!conv.ratingDone, dismissed: !!conv.ratingDone, rated: null, commentOpen: false, commentDraft: "", commentSent: false };
       setActiveConversation(conv.id);
+      followLatest();
       renderMessages();
       /* Reuses the upload notice bar rather than adding a second one. Without
          this the model would appear to have forgotten a document the
@@ -1927,6 +1978,7 @@
       // Nothing is written until the first turn, so the list never fills up
       // with empty threads.
       setActiveConversation(null);
+      followLatest();
       renderMessages();
     }
 
@@ -2351,6 +2403,7 @@
       // Save the question before the answer exists: a tab closed mid-answer
       // should still leave the conversation in the archive.
       persist();
+      followLatest();
       setLoading(true);
 
       abortController = new AbortController();
