@@ -27,7 +27,7 @@
 (function () {
   "use strict";
 
-  var WIDGET_VERSION = "1.14.0";
+  var WIDGET_VERSION = "1.15.0";
 
   var PIXEL_URL = "https://ueczzuogsj2hnfdr7gwfwuh5sa0oozkm.lambda-url.us-east-2.on.aws/";
 
@@ -1148,7 +1148,11 @@
     html = html.replace(/^(#{1,6})\s+(.+)$/gm, function (_, hashes, content) {
       return "<strong>" + content + "</strong>";
     });
-    html = html.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
+    // Bold may wrap an italic run (**check whether X *also* predicts Y**), so
+    // allow lone stars inside; then single-star italics, which must hug their
+    // text (no "* item" bullets, no a*b) and not sit inside a word.
+    html = html.replace(/\*\*((?:[^*]|\*(?!\*))+?)\*\*/g, "<strong>$1</strong>");
+    html = html.replace(/(^|[^*\w])\*([^*\s][^*\n]*?[^*\s]|[^*\s])\*(?![\w*])/g, "$1<em>$2</em>");
     html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, function (_, t, u) {
       var safeUrl = /^(https?:|mailto:|\/)/i.test(u) ? u : "#";
       return '<a href="' + escapeHtml(safeUrl) + '" target="_blank" rel="noopener noreferrer">' + t + "</a>";

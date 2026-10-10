@@ -1020,7 +1020,11 @@
     var held = protectSpans(text);
     var html = esc(held.text);
     html = html.replace(/^(#{1,6})\s+(.+)$/gm, function(_, h, c) { return "<strong>" + c + "</strong>"; });
-    html = html.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
+    // Bold may wrap an italic run (**check whether X *also* predicts Y**), so
+    // allow lone stars inside; then single-star italics, which must hug their
+    // text (no "* item" bullets, no a*b) and not sit inside a word.
+    html = html.replace(/\*\*((?:[^*]|\*(?!\*))+?)\*\*/g, "<strong>$1</strong>");
+    html = html.replace(/(^|[^*\w])\*([^*\s][^*\n]*?[^*\s]|[^*\s])\*(?![\w*])/g, "$1<em>$2</em>");
     html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, function(_, t, u) {
       var safe = /^(https?:|mailto:|\/)/i.test(u) ? u : "#";
       return '<a href="' + esc(safe) + '" target="_blank" rel="noopener noreferrer">' + t + '</a>';
