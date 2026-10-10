@@ -27,7 +27,7 @@
 (function () {
   "use strict";
 
-  var WIDGET_VERSION = "1.12.0";
+  var WIDGET_VERSION = "1.13.0";
 
   var PIXEL_URL = "https://ueczzuogsj2hnfdr7gwfwuh5sa0oozkm.lambda-url.us-east-2.on.aws/";
 
@@ -1294,6 +1294,18 @@
     var chipsEl = shadow.querySelector(".chips");
     var errEl = shadow.querySelector(".upload-err");
     var errTextEl = shadow.querySelector(".upload-err-text");
+    // Long-input cap (server-side, 10,000 chars per message). The same note
+    // shows while an over-cap draft sits in the box, and again when the server
+    // reports it cut the message (a `notice` event, so old history or an agent
+    // client is covered too). It reuses the amber upload-note slot.
+    var LONG_INPUT_CHARS = 10000;
+    var LONG_INPUT_NOTICE = "Your message exceeds the word limit. For tasks involving lengthy documents or extended writing, please consider using a general-purpose LLM.";
+    var longInputNoteShown = false;
+    function syncLongInputNote() {
+      var long = textarea.value.length > LONG_INPUT_CHARS;
+      if (long && !longInputNoteShown) { showUploadNote(LONG_INPUT_NOTICE); longInputNoteShown = true; }
+      else if (!long && longInputNoteShown) { clearUploadError(); longInputNoteShown = false; }
+    }
     var generalFeedbackBtn = shadow.querySelector(".general-feedback-btn");
     var modalOverlay = shadow.querySelector(".modal-overlay");
     var modalTextarea = shadow.querySelector(".modal-textarea");
@@ -2044,6 +2056,7 @@
         requestAnimationFrame(tick);
       }
       requestAnimationFrame(tick);
+      syncLongInputNote();
     }
 
     function stopRevealLoop() {
@@ -2458,6 +2471,10 @@
         }
         streaming = false;
         if (wasAbort) {
+                } else if (evt.type === "notice" && evt.content) {
+                  // Server cut the latest message to the long-input cap.
+                  showUploadNote(evt.content);
+                  longInputNoteShown = false;
           var last = messages[messages.length - 1];
           if (last && last.role === "assistant" && !last.content) {
             last.content = "_(stopped)_";

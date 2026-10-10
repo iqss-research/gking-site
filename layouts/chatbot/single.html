@@ -1366,6 +1366,7 @@
         messages[streamMsgIdx].content = streamTarget.slice(0, streamRevealed);
         renderMessages();
       }
+    syncLongInputNote();
       requestAnimationFrame(tick);
     }
     requestAnimationFrame(tick);
@@ -1443,6 +1444,17 @@
     if (file.size > MAX_BYTES[kind]) {
       return "“" + file.name + "” is " + fmtBytes(file.size) +
         " — the limit is " + fmtBytes(MAX_BYTES[kind]) + " for this file type.";
+  // Long-input cap (server-side, 10,000 chars per message). The same note
+  // shows while an over-cap draft sits in the box, and again when the server
+  // reports it cut the message (a `notice` event). Reuses the amber note slot.
+  var LONG_INPUT_CHARS = 10000;
+  var LONG_INPUT_NOTICE = "Your message exceeds the word limit. For tasks involving lengthy documents or extended writing, please consider using a general-purpose LLM.";
+  var longInputNoteShown = false;
+  function syncLongInputNote() {
+    var long = textarea.value.length > LONG_INPUT_CHARS;
+    if (long && !longInputNoteShown) { showUploadNote(LONG_INPUT_NOTICE); longInputNoteShown = true; }
+    else if (!long && longInputNoteShown) { clearUploadError(); longInputNoteShown = false; }
+  }
     }
     return null;
   }
@@ -1779,6 +1791,8 @@
         T.track("error", {
           where: "send",
           name: (e && e.name) || "Error",
+              // Server cut the latest message to the long-input cap.
+              else if (evt.type === "notice" && evt.content) { showUploadNote(evt.content); longInputNoteShown = false; }
           message: String((e && e.message) || e).slice(0, 200),
           waited_ms: turnStartedAt ? Date.now() - turnStartedAt : null
         }, { immediate: true });
